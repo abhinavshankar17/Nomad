@@ -24,6 +24,7 @@
 - [Project Structure](#-project-structure)
 - [Pages & Modules](#-pages--modules)
 - [Eco Points & Marketplace](#-eco-points--marketplace)
+- [AI Mobility Advisor Experience](#-ai-mobility-advisor-experience)
 - [Design Philosophy](#-design-philosophy)
 - [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
@@ -76,6 +77,12 @@ The platform includes:
 - 6 artisan products sourced from Maharashtra rural cooperatives and tribal SHGs
 - Government-style order receipts with official reference numbers
 - Product categories: Handlooms, Artisan Crafts, Organic Foods, Tribal Art
+
+### 🎙️ AI Mobility Advisor Experience
+- Cinematic voice assistant sequence triggered when analyzing a route
+- Siri-like pulsing voice orb (gradient core + 3 pulsing rings) reacting dynamically to speech
+- Text-to-speech voice narration (via Web Speech API) synced with a floating transcript bar
+- Step-by-step map path highlighting and perspective card glow animations matching voice descriptions
 
 ### 🎨 Premium Design
 - Light / Dark theme toggle with smooth transitions
@@ -203,10 +210,10 @@ A full desktop commute planning workspace:
 - **Split-screen layout** — 70% interactive map + 30% analysis sidebar
 - **Origin/Destination inputs** — With live autocomplete powered by OpenStreetMap Nominatim API
 - **Departure time selector** — Dynamically generated time slots from current time
-- **"Analyze Route" button** — Triggers a simulated AI analysis with loading skeleton
-- **Four perspective cards** — Time, Cost, Safety, and Environmental analysis with contextual reasoning
-- **Recommended Decision card** — Final multi-factor recommendation with key metrics
-- **Animated route polylines** — Drawn on the map connecting origin and destination markers
+- **"Analyze Route" button** — Triggers the cinematic AI Mobility Advisor sequence (see [AI Mobility Advisor Experience](#-ai-mobility-advisor-experience))
+- **Four perspective cards** — Time, Cost, Safety, and Environmental analysis with contextual reasoning (highlighted dynamically in sync with the AI voice)
+- **Recommended Decision card** — Final multi-factor recommendation with key metrics, displayed after the AI presentation finishes
+- **Animated route polylines** — Drawn dynamically on the map in real-time as the advisor guides the commuter
 
 ### 3. Mobile App Mockup (`app.html` + `main.js`)
 
@@ -277,6 +284,79 @@ Eco Points Formula:
 ### State Management
 
 Points are synchronized across all pages using `sessionStorage` with the key `nomad-eco-points`. This ensures a consistent balance whether you're on the profile page, mobile app, or marketplace.
+
+---
+
+## 🎙️ AI Mobility Advisor Experience
+
+NOMAD features an **AI Mobility Advisor** built for a premium, cinematic user experience. When you plan a commute in the Route Advisor Workspace and click **"Analyze Route"**, the system orchestrates a synchronized sequence of map animations, text-to-speech audio guidance, and side-panel visual cues.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant App as Route Advisor UI
+    participant Map as Leaflet Map
+    participant Orb as AI Voice Orb
+    participant TTS as Web Speech Synthesis
+    participant Sidebar as Analysis Sidebar
+
+    User->>App: Clicks "Analyze Route"
+    activate App
+    App->>Map: Smoothly zooms to route bounds (~1.5s)
+    App->>App: Activates cinematic dim overlay
+    App->>App: Displays "Analyzing your commute..." HUD
+    deactivate App
+
+    Note over App,Map: Phase 1: AI Route Planning & Drawing
+    App->>Map: Animates recommended route polyline drawing (transition)
+    App->>Map: Fades in secondary alternative route polylines
+
+    Note over App,Orb: Phase 2: AI Advisor Activation
+    App->>Orb: Activates Siri-like Voice Orb (glowing core + 3 pulsing rings)
+    App->>App: Displays floating Transcript Bar
+    App->>Map: Spawns glowing vehicle icon animating along path
+
+    Note over App,TTS: Phase 3: Conversational Voice Guidance
+    loop For each recommendation sentence
+        App->>TTS: Speaks line aloud (e.g. "Metro is best", "Save ₹30", etc.)
+        App->>Orb: Triggers speaking heartbeat animation
+        App->>App: Updates floating transcript text bar
+        App->>Sidebar: Adds glowing violet outline (.ai-highlight) to active metric card
+        TTS-->>App: Sentence complete
+    end
+
+    Note over App,Orb: Phase 4: Resolution
+    App->>Orb: Stop heartbeat animation & hide orb
+    App->>App: Fades out transcript bar and cinematic overlay
+    App->>Sidebar: Displays final Recommended Decision Card and details
+```
+
+### The 7-Phase Cinematic Sequence
+
+| Phase | Description | Visual / Audio Effect | Duration |
+|-------|-------------|-----------------------|----------|
+| **1. Map Zoom** | Focuses the map on the route corridor. | Leaflet map shifts smooth-bounds. | ~1.5s |
+| **2. Cinematic Dimming** | Fades in a dark overlay to isolate map details. | `.ai-cinematic-overlay` radial gradient. | ~0.4s |
+| **3. Deep Analysis** | Displays a holographic commute planning HUD. | Spinning violet `.ai-analyzing-hud` widget. | ~2.2s |
+| **4. Assistant Awakening** | Fades in the Siri-like voice orb at the bottom of the map. | Ambient orb core + 3 pulsing concentric SVG rings. | ~0.6s |
+| **5. Path Drawing** | Traces the recommended route directly onto the map. | Leaflet polyline draws itself using stroke-dash offsets. | ~1.2s |
+| **6. Conversational Guide** | Voices recommendations aloud while updating text on-screen. | Web Speech Synthesis synced to `.ai-transcript-bar`. | Variable (speech length) |
+| **7. Metric Highlight** | Glows the corresponding sidebar metric card during narration. | `.ai-highlight` pulse transition on the sidebar card. | Syncs with audio lines |
+
+### Key Audio Script Highlights
+
+- **Greeting & Route Frame:** *"Good morning. I've analyzed your commute from Chhatrapati Shivaji Terminus to Bandra Kurla Complex."*
+- **Best Option Selection:** *"The metro line 2 is your best option today. You'll arrive in 42 minutes."*
+- **Financial Benefit:** *"You'll save ₹30 compared to ride-sharing."* (Highlights **Cost** card)
+- **Environmental Impact:** *"This route reduces your carbon emissions by 72 percent."* (Highlights **Environmental** card)
+- **Safety Directive:** *"Proceed to the nearest metro station gate. Have a safe commute."* (Highlights **Safety** card)
+
+### Core Technologies Used
+
+- **Speech Synthesis (Web Speech API):** Uses native `window.speechSynthesis` to vocalize text without server dependencies. Prioritizes premium voices (Google, Samantha, Daniel, Microsoft) at a natural, trustworthy pace (`rate = 0.92`).
+- **Concentric CSS Keyframe Animations:** Utilizes pure CSS `@keyframes` animations for the three independent pulsing rings (`ai-orb-pulse`) and the conversational heart-beat contraction (`ai-orb-speak-beat`) when speaking.
+- **Dynamic SVG Path Offsets:** Queries the total line length of Leaflet vectors (`getTotalLength()`) and applies dynamic CSS transitions to create a smooth self-drawing route line.
 
 ---
 
