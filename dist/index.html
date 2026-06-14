@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOMAD — Every commute. Optimized for you.</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="NOMAD learns how you travel and recommends the best transportation decisions based on time, cost, safety, and environmental impact.">
+  <meta property="og:title" content="NOMAD — Every commute. Optimized for you.">
+  <meta property="og:description" content="A premium mobility operating system designed to optimize your daily travel dynamically.">
+  <meta property="og:type" content="website">
+  
+  <!-- Leaflet CSS & JS for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Custom Design Styles -->
+  <script type="module" crossorigin src="/assets/main-I5Wp1tbZ.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-TuDwPi1l.css">
+</head>
+<body data-theme="light">
+
+  <!-- Minimal Navigation Bar -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="nav-brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 22h20L12 2z"/>
+      </svg>
+      <span>NOMAD</span>
+    </a>
+    
+    <div class="nav-status">
+      <div class="status-indicator"></div>
+      <span id="system-status-text">All transport networks operational</span>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+        <i data-lucide="moon" class="theme-icon-dark"></i>
+        <i data-lucide="sun" class="theme-icon-light" style="display: none;"></i>
+      </button>
+      <a href="./profile.html" class="btn btn-secondary" id="nav-profile-btn">Travel Profile</a>
+      <a href="./app.html" class="btn btn-secondary" id="nav-demo-btn">Launch App</a>
+    </div>
+  </nav>
+
+  <!-- Interactive Map & Hero Section -->
+  <section class="hero-map-viewport" id="hero-section">
+    <!-- Immersive Maps Background -->
+    <div id="map"></div>
+    
+    <!-- Hero Color & Contrast Mask -->
+    <div class="hero-map-overlay"></div>
+    
+    <!-- Central Hero UI -->
+    <div class="hero-content" id="hero-content">
+      <div class="hero-tagline">Mobility Operating System</div>
+      <h1 class="hero-headline">Every commute.<br>Optimized for you.</h1>
+      <p class="hero-subheadline">
+        NOMAD learns how you travel and recommends the best transportation decisions based on time, cost, safety, and environmental impact.
+      </p>
+      <div class="hero-ctas">
+        <a href="./planner.html" class="btn btn-primary" id="start-planning-btn">Start Planning</a>
+        <a href="#" class="btn btn-secondary" id="see-demo-btn">See Demo</a>
+      </div>
+    </div>
+    
+    <!-- Floating Interactive Demo HUD (Revealed in Demo Mode) -->
+    <div class="demo-hud">
+      <!-- Left routing planner widget -->
+      <div class="search-widget" id="search-widget">
+        <div class="search-input-container">
+          <i data-lucide="navigation"></i>
+          <input type="text" value="Bengaluru Tech Corridor (ITPL, Whitefield)" readonly>
+        </div>
+        
+        <div class="routes-list" id="routes-list">
+          <!-- Route Option 1 (Fastest / Transit) -->
+          <div class="route-card active" data-route-id="transit">
+            <div class="route-card-header">
+              <span class="route-badge badge-time">Fastest Option</span>
+              <span class="route-duration">28 mins</span>
+            </div>
+            <div class="route-meta">
+              <span class="route-meta-item">
+                <i data-lucide="train"></i> Namma Metro (Purple Line)
+              </span>
+              <span class="route-meta-item">
+                <i data-lucide="indian-rupee"></i> 35
+              </span>
+            </div>
+            <div class="route-recommendation">
+              <i data-lucide="sparkles"></i> Leaves in 3 mins. Low density coach.
+            </div>
+          </div>
+
+          <!-- Route Option 2 (Eco / E-Bike) -->
+          <div class="route-card" data-route-id="ebike">
+            <div class="route-card-header">
+              <span class="route-badge badge-carbon">80% Less Carbon</span>
+              <span class="route-duration">42 mins</span>
+            </div>
+            <div class="route-meta">
+              <span class="route-meta-item">
+                <i data-lucide="bike"></i> Nomad Smart E-Bike
+              </span>
+              <span class="route-meta-item">
+                <i data-lucide="indian-rupee"></i> 60
+              </span>
+            </div>
+            <div class="route-recommendation">
+              <i data-lucide="sparkles"></i> Sunny morning. Safe lane along HAL road.
+            </div>
+          </div>
+
+          <!-- Route Option 3 (Comfort / Rideshare) -->
+          <div class="route-card" data-route-id="rideshare">
+            <div class="route-card-header">
+              <span class="route-badge badge-money">AC Comfort Cab</span>
+              <span class="route-duration">65 mins</span>
+            </div>
+            <div class="route-meta">
+              <span class="route-meta-item">
+                <i data-lucide="car"></i> Nomad Shared Cab
+              </span>
+              <span class="route-meta-item">
+                <i data-lucide="indian-rupee"></i> 180
+              </span>
+            </div>
+            <div class="route-recommendation">
+              <i data-lucide="sparkles"></i> Heavy traffic at Marathahalli. Expected delay.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-right status widget -->
+      <div class="hud-status-widget" id="status-widget">
+        <div class="hud-status-item">
+          <span class="hud-status-label">Vehicle Link</span>
+          <span class="hud-status-val">
+            <i data-lucide="link"></i> 94%
+          </span>
+        </div>
+        <div class="hud-status-item">
+          <span class="hud-status-label">Air Quality</span>
+          <span class="hud-status-val">
+            <i data-lucide="wind"></i> 112 AQI
+          </span>
+        </div>
+        <div class="hud-status-item">
+          <span class="hud-status-label">Local Sky</span>
+          <span class="hud-status-val">
+            <i data-lucide="sun"></i> 29°C
+          </span>
+        </div>
+      </div>
+
+      <!-- Exit Demo Button -->
+      <button class="btn btn-primary btn-exit-demo" id="exit-demo-btn">
+        <i data-lucide="x"></i> Exit Demo
+      </button>
+    </div>
+    
+    <!-- Hero Scroll indicator link -->
+    <a href="#features" class="scroll-indicator" id="scroll-indicator">
+      <span>Discover Nomad</span>
+      <i data-lucide="chevron-down"></i>
+    </a>
+  </section>
+
+  <!-- Core Benefits Section (Below-the-fold) -->
+  <section class="features-section" id="features">
+    <div class="features-header">
+      <div class="features-tagline">Commuting Redefined</div>
+      <h2 class="features-title">Intelligent routing. Clear decisions.</h2>
+    </div>
+    
+    <div class="features-grid">
+      <!-- Save Time Card -->
+      <div class="feature-card" id="card-time">
+        <div class="feature-card-icon">
+          <i data-lucide="clock"></i>
+        </div>
+        <h3>Save Time</h3>
+        <p>
+          NOMAD dynamically coordinates train departures, traffic flows, and electric shuttle queues in real-time, matching you with the absolute fastest path home.
+        </p>
+      </div>
+
+      <!-- Save Money Card -->
+      <div class="feature-card" id="card-money">
+        <div class="feature-card-icon">
+          <i data-lucide="dollar-sign"></i>
+        </div>
+        <h3>Save Money</h3>
+        <p>
+          Compare fares across transit networks and shared fleets instantly. Connect your passes into a single smart wallet that automatically finds the cheapest routing ticket.
+        </p>
+      </div>
+
+      <!-- Reduce Carbon Card -->
+      <div class="feature-card" id="card-carbon">
+        <div class="feature-card-icon">
+          <i data-lucide="leaf"></i>
+        </div>
+        <h3>Reduce Carbon</h3>
+        <p>
+          Factor emission offsets into every travel decision. Track personal footprint reduction progress, prioritize zero-emission vehicles, and unlock green reward credits.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Clean minimalist Footer -->
+  <footer class="footer">
+    <nav class="footer-nav">
+      <a href="#" class="footer-link">System Status</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+      <a href="#" class="footer-link">Terms of Service</a>
+      <a href="#" class="footer-link">Security Center</a>
+      <a href="#" class="footer-link">Developer API</a>
+    </nav>
+    <div class="footer-copy">
+      &copy; 2026 NOMAD Technologies, Inc. All systems active.
+    </div>
+  </footer>
+
+  <!-- Lucide Vector Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Interactive Controller Script -->
+</body>
+</html>

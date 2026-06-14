@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOMAD — Route Advisor Workspace</title>
+  
+  <!-- Leaflet CSS for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Custom Design Styles -->
+  <script type="module" crossorigin src="/assets/app-CHKVXq-k.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-TuDwPi1l.css">
+</head>
+<body data-theme="light">
+
+  <!-- Desktop Presentation Wrapper -->
+  <div class="desktop-presentation-container">
+
+    <!-- Center/Right Panel: Interactive Smartphone Viewport Mockup -->
+    <div class="phone-frame-mockup">
+      <div class="phone-earpiece-notch"></div>
+      
+      <!-- Simulated Phone Status Bar -->
+      <div class="phone-status-bar">
+        <span class="status-bar-time" id="status-clock">17:45</span>
+        <div class="status-bar-icons">
+          <i data-lucide="signal" style="width:14px; height:14px;"></i>
+          <i data-lucide="wifi" style="width:14px; height:14px;"></i>
+          <i data-lucide="battery" style="width:18px; height:14px;"></i>
+        </div>
+      </div>
+      
+      <!-- Inside Smartphone Viewport Container -->
+      <div class="phone-viewport">
+        
+        <!-- Live Map Backdrop (Occupies 100% of the screen behind overlays) -->
+        <div class="app-map-container">
+          <div id="map"></div>
+        </div>
+
+        <!-- Floating Utilities on the Map -->
+        <div class="floating-controls-dock">
+          <a href="./index.html" class="floating-circle-btn" aria-label="Home page">
+            <i data-lucide="home"></i>
+          </a>
+          <button class="theme-toggle floating-circle-btn" id="theme-toggle" aria-label="Toggle theme">
+            <i data-lucide="moon" class="theme-icon-dark"></i>
+            <i data-lucide="sun" class="theme-icon-light" style="display: none;"></i>
+          </button>
+        </div>
+
+        <!-- APP SCREENS OVERLAYS (Home Panel is dynamic, others are full page content overlays) -->
+        
+        <!-- TAB PANEL: HOME SCREEN (Interactive Map Bottom Sheet) -->
+        <div class="app-tab-panel active" id="panel-home">
+          
+          <!-- Expandable/Draggable Bottom Sheet -->
+          <div class="bottom-sheet collapsed" id="route-bottom-sheet">
+            <div class="sheet-drag-handle-bar" id="sheet-drag-trigger">
+              <div class="drag-handle-pill"></div>
+            </div>
+            
+            <div class="sheet-scrollable-content">
+              
+              <!-- Collapsed / Initial State: Where to search box -->
+              <div class="collapsed-search-trigger" id="collapsed-search-trigger">
+                <i data-lucide="search" class="search-trigger-icon"></i>
+                <span>Where would you like to commute?</span>
+              </div>
+              
+              <!-- Expandable Input Fields Container -->
+              <div class="planner-form-wrapper" id="planner-form-wrapper" style="display: none;">
+                <div class="sidebar-header">
+                  <div class="sidebar-tag">Advisor Workspace</div>
+                  <h2>Commute Planner</h2>
+                  <p class="sidebar-desc">Enter routes to analyze transit options.</p>
+                </div>
+                
+                <form class="planner-form" id="planner-form">
+                  <div class="input-group autocomplete-container">
+                    <label for="input-origin">Origin</label>
+                    <div class="input-wrapper">
+                      <i data-lucide="map-pin" class="input-icon"></i>
+                      <input type="text" id="input-origin" value="Chhatrapati Shivaji Maharaj Airport (BOM)" placeholder="Start location" autocomplete="off">
+                    </div>
+                    <div class="suggestions-list" id="origin-suggestions" style="display: none;"></div>
+                  </div>
+
+                  <div class="input-group autocomplete-container">
+                    <label for="input-destination">Destination</label>
+                    <div class="input-wrapper">
+                      <i data-lucide="navigation" class="input-icon"></i>
+                      <input type="text" id="input-destination" value="Bandra Kurla Complex (BKC)" placeholder="End destination" autocomplete="off">
+                    </div>
+                    <div class="suggestions-list" id="dest-suggestions" style="display: none;"></div>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="input-time">Departure Time</label>
+                    <div class="input-wrapper">
+                      <i data-lucide="clock" class="input-icon"></i>
+                      <select id="input-time">
+                        <option value="now">Leave Now</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary btn-submit-plan" id="btn-analyze">
+                    <i data-lucide="sparkles"></i> Analyze Route
+                  </button>
+                </form>
+              </div>
+
+              <!-- Skeleton Loader Container -->
+              <div class="analysis-loader" id="analysis-loader" style="display: none;">
+                <div class="loader-message">
+                  <div class="spinner-ring"></div>
+                  <span>NOMAD Advisor is analyzing routes...</span>
+                </div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+              </div>
+
+              <!-- AI Analysis Results Dashboard -->
+              <div class="analysis-results" id="analysis-results" style="display: none;">
+                <h3 class="results-heading">Advisor Insights</h3>
+                
+                <div class="perspectives-grid">
+                  <!-- Time Perspective -->
+                  <div class="perspective-card time-border">
+                    <div class="perspective-header">
+                      <i data-lucide="clock"></i>
+                      <h4>Time</h4>
+                    </div>
+                    <p id="time-reasoning">Analyzing schedule queues...</p>
+                  </div>
+
+                  <!-- Cost Perspective -->
+                  <div class="perspective-card cost-border">
+                    <div class="perspective-header">
+                      <i data-lucide="wallet"></i>
+                      <h4>Cost</h4>
+                    </div>
+                    <p id="cost-reasoning">Calculating fares...</p>
+                  </div>
+
+                  <!-- Safety Perspective -->
+                  <div class="perspective-card safety-border">
+                    <div class="perspective-header">
+                      <i data-lucide="shield-check"></i>
+                      <h4>Safety</h4>
+                    </div>
+                    <p id="safety-reasoning">Checking crowd density...</p>
+                  </div>
+
+                  <!-- Environmental Perspective -->
+                  <div class="perspective-card env-border">
+                    <div class="perspective-header">
+                      <i data-lucide="leaf"></i>
+                      <h4>Carbon</h4>
+                    </div>
+                    <p id="env-reasoning">Measuring footprint...</p>
+                  </div>
+                </div>
+
+                <!-- Advisor Recommendation Card -->
+                <div class="recommended-decision-card" id="decision-card">
+                  <div class="rec-badge">Recommended Decision</div>
+                  <h3 class="rec-mode" id="rec-mode">Take Metro Line 2</h3>
+                  
+                  <div class="rec-metrics">
+                    <div class="metric-item">
+                      <i data-lucide="zap"></i>
+                      <span id="metric-time">43 mins</span>
+                    </div>
+                    <div class="metric-item">
+                      <i data-lucide="indian-rupee"></i>
+                      <span id="metric-cost">₹20 cheaper</span>
+                    </div>
+                    <div class="metric-item">
+                      <i data-lucide="leaf"></i>
+                      <span id="metric-carbon">75% lower emissions</span>
+                    </div>
+                    <div class="metric-item">
+                      <i data-lucide="award"></i>
+                      <span id="metric-safety">Highest safety score</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB PANEL: TRIPS SCREEN -->
+        <div class="app-tab-panel" id="panel-trips">
+          <div class="panel-container scrollable-panel">
+            <h2 class="panel-title">Saved Commutes</h2>
+            <p class="panel-subtitle">Tap a route card to execute instantaneous AI analysis.</p>
+            
+            <div class="saved-routes-list">
+              <div class="saved-route-card" data-origin="Chhatrapati Shivaji Maharaj Airport (BOM)" data-dest="Bandra Kurla Complex (BKC)">
+                <div class="saved-route-icon"><i data-lucide="navigation-2"></i></div>
+                <div class="saved-route-details">
+                  <h4>Daily Work Commute</h4>
+                  <span>Airport (BOM) → BKC</span>
+                  <div class="saved-route-tags">
+                    <span class="tag tag-time">Metro preferred</span>
+                    <span class="tag tag-money">₹30 fare</span>
+                  </div>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-icon"></i>
+              </div>
+
+              <div class="saved-route-card" data-origin="Gateway of India, Colaba" data-dest="Bandra Kurla Complex (BKC)">
+                <div class="saved-route-icon"><i data-lucide="compass"></i></div>
+                <div class="saved-route-details">
+                  <h4>South Corridor Connect</h4>
+                  <span>Colaba → BKC Office</span>
+                  <div class="saved-route-tags">
+                    <span class="tag tag-carbon">E-bike trail</span>
+                    <span class="tag tag-safety">Separated lanes</span>
+                  </div>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-icon"></i>
+              </div>
+
+              <div class="saved-route-card" data-origin="Marine Drive, Churchgate" data-dest="Nariman Point Financial District">
+                <div class="saved-route-icon"><i data-lucide="footprints"></i></div>
+                <div class="saved-route-details">
+                  <h4>Short Shuttle Link</h4>
+                  <span>Marine Drive → Nariman Point</span>
+                  <div class="saved-route-tags">
+                    <span class="tag tag-carbon">Walk optimized</span>
+                    <span class="tag tag-time">6 mins duration</span>
+                  </div>
+                </div>
+                <i data-lucide="chevron-right" class="arrow-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB PANEL: INSIGHTS SCREEN (Sustainability Dashboard) -->
+        <div class="app-tab-panel" id="panel-insights">
+          <div class="panel-container scrollable-panel">
+            <div class="wrapped-badge" style="background: linear-gradient(135deg, var(--color-carbon) 0%, var(--color-money) 100%);">Sustainability Dashboard</div>
+            <h2 class="panel-title">This Month's Ecological Footprint</h2>
+            
+            <div class="sustainability-summary-grid mobile-grid-layout">
+              <div class="sustainability-metric-card">
+                <div class="sustainability-card-icon" style="background-color: var(--color-carbon-light); color: var(--color-carbon);">
+                  <i data-lucide="leaf"></i>
+                </div>
+                <div class="sustainability-card-info">
+                  <span class="sustainability-val">142 kg</span>
+                  <span class="sustainability-label">Carbon Saved</span>
+                  <p class="sustainability-story">Bypassed tailpipe emissions, preventing 142 kg of greenhouse gases from entering the local atmosphere.</p>
+                </div>
+              </div>
+              
+              <div class="sustainability-metric-card">
+                <div class="sustainability-card-icon" style="background-color: rgba(13, 148, 136, 0.1); color: var(--color-money);">
+                  <i data-lucide="tree-pine"></i>
+                </div>
+                <div class="sustainability-card-info">
+                  <span class="sustainability-val">6.8 Trees</span>
+                  <span class="sustainability-label">Equivalent Offset</span>
+                  <p class="sustainability-story">Your green choices did the work of 6.8 mature trees absorbing CO₂ for a full month.</p>
+                </div>
+              </div>
+
+              <div class="sustainability-metric-card">
+                <div class="sustainability-card-icon" style="background-color: rgba(226, 135, 67, 0.1); color: #e28743;">
+                  <i data-lucide="fuel"></i>
+                </div>
+                <div class="sustainability-card-info">
+                  <span class="sustainability-val">₹4,820</span>
+                  <span class="sustainability-label">Fuel Cost Saved</span>
+                  <p class="sustainability-story">Skipping highway fuel tariffs and toll costs saved your wallet ₹4,820 this month.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode Comparison List -->
+            <div class="sustainability-comparison" style="border-top: none; margin-top: 16px; padding-top: 0;">
+              <h3 class="comparison-title">Commute Emissions Comparison</h3>
+              <p class="comparison-subtitle">See how your transit options compare in carbon footprint per passenger-kilometer.</p>
+              
+              <div class="comparison-list">
+                <!-- Walking -->
+                <div class="comparison-row">
+                  <div class="comparison-mode">
+                    <i data-lucide="footprints" style="color: var(--color-carbon);"></i>
+                    <span>Walking</span>
+                  </div>
+                  <div class="comparison-bar-cell">
+                    <div class="comparison-bar-wrapper">
+                      <div class="comparison-bar" style="width: 0%; background-color: var(--color-carbon);"></div>
+                    </div>
+                    <span class="comparison-metrics">0g CO₂/km</span>
+                  </div>
+                  <p class="comparison-story-text">Zero footprint. The cleanest, healthiest human-powered commute.</p>
+                </div>
+
+                <!-- Bike -->
+                <div class="comparison-row">
+                  <div class="comparison-mode">
+                    <i data-lucide="bike" style="color: var(--color-carbon);"></i>
+                    <span>Eco E-Bike</span>
+                  </div>
+                  <div class="comparison-bar-cell">
+                    <div class="comparison-bar-wrapper">
+                      <div class="comparison-bar" style="width: 0%; background-color: var(--color-carbon);" id="bar-bike"></div>
+                    </div>
+                    <span class="comparison-metrics">8g CO₂/km</span>
+                  </div>
+                  <p class="comparison-story-text">Ultra-efficient lanes. Minimal carbon from electrical grids.</p>
+                </div>
+
+                <!-- Metro -->
+                <div class="comparison-row">
+                  <div class="comparison-mode">
+                    <i data-lucide="train" style="color: var(--color-time);"></i>
+                    <span>Metro Line 2</span>
+                  </div>
+                  <div class="comparison-bar-cell">
+                    <div class="comparison-bar-wrapper">
+                      <div class="comparison-bar" style="width: 0%; background-color: var(--color-time);" id="bar-metro"></div>
+                    </div>
+                    <span class="comparison-metrics">14g CO₂/km</span>
+                  </div>
+                  <p class="comparison-story-text">Mass transit. Low footprint from passenger density.</p>
+                </div>
+
+                <!-- Bus -->
+                <div class="comparison-row">
+                  <div class="comparison-mode">
+                    <i data-lucide="bus" style="color: var(--color-money);"></i>
+                    <span>City Shuttle Bus</span>
+                  </div>
+                  <div class="comparison-bar-cell">
+                    <div class="comparison-bar-wrapper">
+                      <div class="comparison-bar" style="width: 0%; background-color: var(--color-money);" id="bar-bus"></div>
+                    </div>
+                    <span class="comparison-metrics">35g CO₂/km</span>
+                  </div>
+                  <p class="comparison-story-text">Shared shuttle. Density scales down individual emissions.</p>
+                </div>
+
+                <!-- Car -->
+                <div class="comparison-row">
+                  <div class="comparison-mode">
+                    <i data-lucide="car" style="color: #e28743;"></i>
+                    <span>Private Car</span>
+                  </div>
+                  <div class="comparison-bar-cell">
+                    <div class="comparison-bar-wrapper">
+                      <div class="comparison-bar" style="width: 0%; background-color: #e28743;" id="bar-car"></div>
+                    </div>
+                    <span class="comparison-metrics">192g CO₂/km</span>
+                  </div>
+                  <p class="comparison-story-text">Combustion baseline. High solo emissions and gridlock footprint.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB PANEL: PROFILE SCREEN (Your Travel Profile) -->
+        <div class="app-tab-panel" id="panel-profile">
+          <div class="panel-container scrollable-panel">
+            
+            <!-- Apple Health / Spotify Wrapped Header -->
+            <header class="profile-hero mobile-hero-layout" style="padding: 16px 0 24px 0;">
+              <div class="profile-hero-content">
+                <div class="wrapped-badge">Your Travel Profile</div>
+                <h1 class="profile-title" style="font-size: 1.4rem; margin-top: 4px;">Commuting Fingerprint</h1>
+                <p class="profile-subtitle">You are shifting transit patterns towards highly efficient corridors.</p>
+              </div>
+              
+              <div class="activity-rings-card" style="margin-top: 16px;">
+                <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+                  <circle class="ring-bg" cx="50" cy="50" r="40" />
+                  <circle class="ring-active" id="carbon-ring" cx="50" cy="50" r="40" style="stroke-dashoffset: 251.2;" />
+                </svg>
+                <div class="ring-content">
+                  <span class="ring-val">80%</span>
+                  <span class="ring-label">Carbon Goal</span>
+                </div>
+              </div>
+            </header>
+
+            <div class="stat-cards-container">
+              <div class="stat-card" style="background: linear-gradient(135deg, var(--color-time) 0%, rgba(99, 102, 241, 0.8) 100%);">
+                <div class="stat-icon"><i data-lucide="clock"></i></div>
+                <div class="stat-value">36m</div>
+                <div class="stat-label">Average Commute Time</div>
+              </div>
+
+              <div class="stat-card" style="background: linear-gradient(135deg, var(--color-money) 0%, rgba(16, 185, 129, 0.8) 100%);">
+                <div class="stat-icon"><i data-lucide="indian-rupee"></i></div>
+                <div class="stat-value">₹1,240</div>
+                <div class="stat-label">Monthly Money Spent</div>
+              </div>
+
+              <div class="stat-card" style="background: linear-gradient(135deg, var(--color-carbon) 0%, rgba(13, 148, 136, 0.8) 100%); cursor: pointer;" id="stat-card-points">
+                <div class="stat-icon"><i data-lucide="leaf"></i></div>
+                <div class="stat-value" id="app-points-val">142</div>
+                <div class="stat-label">Eco Points</div>
+              </div>
+            </div>
+
+            <!-- Redeem CTA -->
+            <div style="margin-top: 12px;">
+              <button class="btn btn-primary" id="btn-redeem-app" style="width: 100%; padding: 10px; font-size: 0.85rem; border-radius: var(--radius-lg); font-weight: 700;">🌿 Redeem at Maha Eco-Bazaar</button>
+            </div>
+
+            <!-- Mode Distribution Donut Chart -->
+            <div class="details-card" style="margin-top: 16px;">
+              <h3 class="details-card-title">Preferred Transportation Methods</h3>
+              <div class="distribution-chart-wrapper">
+                <div class="donut-chart-container">
+                  <svg class="donut-svg" width="100" height="100" viewBox="0 0 100 100">
+                    <circle class="donut-bg" cx="50" cy="50" r="40" />
+                    <circle class="donut-segment" id="donut-segment-metro" cx="50" cy="50" r="40" stroke="var(--color-time)" stroke-dasharray="0 251.2" stroke-dashoffset="0" />
+                    <circle class="donut-segment" id="donut-segment-bike" cx="50" cy="50" r="40" stroke="var(--color-carbon)" stroke-dasharray="0 251.2" stroke-dashoffset="-138.16" />
+                    <circle class="donut-segment" id="donut-segment-ride" cx="50" cy="50" r="40" stroke="#e28743" stroke-dasharray="0 251.2" stroke-dashoffset="-213.52" />
+                  </svg>
+                  <div class="donut-center-label">
+                    <span class="donut-total-val">3</span>
+                    <span class="donut-total-desc">Modes active</span>
+                  </div>
+                </div>
+                <div class="donut-legend">
+                  <div class="legend-item">
+                    <span class="legend-color-dot" style="background-color: var(--color-time);"></span>
+                    <span class="legend-label">Metro (55%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color-dot" style="background-color: var(--color-carbon);"></span>
+                    <span class="legend-label">E-bike (30%)</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-color-dot" style="background-color: #e28743;"></span>
+                    <span class="legend-label">Rideshare (15%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Commute Frequency Trend Chart -->
+            <div class="details-card" style="margin-top: 16px;">
+              <div class="wrapped-badge" style="margin-bottom:8px;">Monthly travel patterns</div>
+              <h3 class="details-card-title" style="margin-top:0;">Commute Frequency Trend</h3>
+              
+              <div class="chart-container" style="padding: 10px 0;">
+                <svg class="chart-svg" viewBox="0 0 800 200" style="height: 120px;">
+                  <defs>
+                    <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  
+                  <line class="chart-grid-line" x1="50" y1="40" x2="780" y2="40" />
+                  <line class="chart-grid-line" x1="50" y1="95" x2="780" y2="95" />
+                  <line class="chart-grid-line" x1="50" y1="150" x2="780" y2="150" />
+                  
+                  <path class="chart-area-path" id="chart-area" d="M 50 150 L 50 150 L 196 150 L 342 150 L 488 150 L 634 150 L 780 150 L 780 150 Z" fill="url(#chart-gradient)" />
+                  <path class="chart-line-path" id="chart-line" d="M 50 150 L 50 150 L 196 150 L 342 150 L 488 150 L 634 150 L 780 150" />
+                  
+                  <text class="chart-axis-label" x="50" y="180">Jan</text>
+                  <text class="chart-axis-label" x="196" y="180">Feb</text>
+                  <text class="chart-axis-label" x="342" y="180">Mar</text>
+                  <text class="chart-axis-label" x="488" y="180">Apr</text>
+                  <text class="chart-axis-label" x="634" y="180">May</text>
+                  <text class="chart-axis-label" x="780" y="180">Jun</text>
+
+                  <circle class="chart-point" id="pt-0" cx="50" cy="150" r="5" data-val="42 trips" data-month="Jan" />
+                  <circle class="chart-point" id="pt-1" cx="196" cy="150" r="5" data-val="48 trips" data-month="Feb" />
+                  <circle class="chart-point" id="pt-2" cx="342" cy="150" r="5" data-val="55 trips" data-month="Mar" />
+                  <circle class="chart-point" id="pt-3" cx="488" cy="150" r="5" data-val="52 trips" data-month="Apr" />
+                  <circle class="chart-point" id="pt-4" cx="634" cy="150" r="5" data-val="60 trips" data-month="May" />
+                  <circle class="chart-point" id="pt-5" cx="780" cy="150" r="5" data-val="72 trips" data-month="Jun" />
+                </svg>
+                <div class="chart-tooltip" id="chart-tooltip" style="position: absolute; pointer-events: none; opacity: 0; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;"></div>
+              </div>
+            </div>
+
+            <!-- Frequent Destinations -->
+            <div class="details-card" style="margin-top: 16px; margin-bottom: 24px;">
+              <h3 class="details-card-title">Frequent Destinations</h3>
+              <div class="destination-list">
+                <div class="destination-item">
+                  <div class="dest-number-badge">1</div>
+                  <div class="dest-details">
+                    <div class="dest-name">Bandra Kurla Complex (BKC)</div>
+                    <div class="dest-meta">
+                      <span>18 commutes</span>
+                      <span style="color: var(--color-carbon);">E-bike preferred</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="destination-item">
+                  <div class="dest-number-badge">2</div>
+                  <div class="dest-details">
+                    <div class="dest-name">Chhatrapati Shivaji Airport (BOM)</div>
+                    <div class="dest-meta">
+                      <span>8 commutes</span>
+                      <span style="color: var(--color-time);">Metro preferred</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB PANEL: MARKETPLACE SCREEN (Maha Eco-Bazaar inside mobile) -->
+        <div class="app-tab-panel" id="panel-marketplace">
+          <div class="panel-container scrollable-panel" style="padding-top: 16px;">
+
+            <!-- Back Button -->
+            <button class="btn btn-secondary" id="marketplace-back-btn" style="margin-bottom: 12px; font-size: 0.8rem; padding: 6px 14px; border-radius: var(--radius-full);">
+              ← Back to Profile
+            </button>
+
+            <!-- Gov Header -->
+            <div style="background: #003366; color: #fff; padding: 12px 16px; border-radius: 6px 6px 0 0; text-align: center;">
+              <div style="font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px;">Government of Maharashtra</div>
+              <div style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.01em;">Maha Eco-Bazaar</div>
+              <div style="font-size: 0.65rem; opacity: 0.6; margin-top: 2px;">Dept. of Rural Livelihood & Sustainability</div>
+            </div>
+            <div style="height: 4px; background: linear-gradient(to right, #FF9933 33.33%, #fff 33.33%, #fff 66.66%, #138808 66.66%);"></div>
+
+            <!-- Balance Bar -->
+            <div style="background: #f5f5f0; border: 1px solid #ddd; border-top: none; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: #666; font-weight: 600;">Eco Points Balance:</span>
+              <strong style="font-size: 1rem; color: #138808; font-weight: 800;" id="app-marketplace-points">142</strong>
+            </div>
+
+            <!-- Product List -->
+            <div style="border: 1px solid #ddd; border-top: none; margin-bottom: 24px;" id="app-product-list">
+
+              <div class="app-product-item" data-cost="60" data-reward="Khadi Scarf" data-artisan="Savita Tai — Wardha">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Handwoven Khadi Scarf</div>
+                  <div style="font-size: 0.65rem; color: #888;">Savita Tai, Wardha • Handloom</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">60</span>
+                  <button class="app-redeem-btn" data-cost="60" data-reward="Handwoven Khadi Scarf" data-artisan="Savita Tai — Wardha SHG">Redeem</button>
+                </div>
+              </div>
+
+              <div class="app-product-item" data-cost="40" data-reward="Bamboo Bottle" data-artisan="Ramdas Mandavi — Gondia">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Gondia Bamboo Bottle</div>
+                  <div style="font-size: 0.65rem; color: #888;">Ramdas Mandavi, Gondia • Bamboo</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">40</span>
+                  <button class="app-redeem-btn" data-cost="40" data-reward="Gondia Bamboo Travel Bottle" data-artisan="Ramdas Mandavi — Gondia Cooperative">Redeem</button>
+                </div>
+              </div>
+
+              <div class="app-product-item" data-cost="30" data-reward="Clay Pot" data-artisan="Kumbhar Potters — Dharavi">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Dharavi Clay Water Pot</div>
+                  <div style="font-size: 0.65rem; color: #888;">Kumbhar Potters, Dharavi • Pottery</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">30</span>
+                  <button class="app-redeem-btn" data-cost="30" data-reward="Dharavi Terracotta Water Pot" data-artisan="Kumbhar Potters Guild — Dharavi">Redeem</button>
+                </div>
+              </div>
+
+              <div class="app-product-item" data-cost="50" data-reward="Wild Honey" data-artisan="Tribal Farmers — Melghat">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Melghat Wild Honey (500g)</div>
+                  <div style="font-size: 0.65rem; color: #888;">Korku Tribal, Melghat • Organic</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">50</span>
+                  <button class="app-redeem-btn" data-cost="50" data-reward="Melghat Wild Forest Honey" data-artisan="Korku Tribal Farmers Union — Melghat">Redeem</button>
+                </div>
+              </div>
+
+              <div class="app-product-item" data-cost="20" data-reward="Cotton Tote" data-artisan="Weavers — Solapur">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Solapur Cotton Tote Bag</div>
+                  <div style="font-size: 0.65rem; color: #888;">Weavers Cooperative, Solapur • Handloom</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">20</span>
+                  <button class="app-redeem-btn" data-cost="20" data-reward="Solapur Handwoven Cotton Tote" data-artisan="Weavers Cooperative — Solapur">Redeem</button>
+                </div>
+              </div>
+
+              <div class="app-product-item" data-cost="100" data-reward="Brass Lamp" data-artisan="Gadiya Collective — Gadchiroli">
+                <div class="app-product-info">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: #003366;">Gadchiroli Dhokra Brass Lamp</div>
+                  <div style="font-size: 0.65rem; color: #888;">Gadiya Lohar, Gadchiroli • Tribal Art</div>
+                </div>
+                <div class="app-product-action">
+                  <span style="font-size: 0.85rem; font-weight: 800; color: #003366;">100</span>
+                  <button class="app-redeem-btn" data-cost="100" data-reward="Gadchiroli Dhokra Brass Oil Lamp" data-artisan="Gadiya Lohar Collective — Gadchiroli">Redeem</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- App Marketplace Order Success Overlay (inside phone viewport) -->
+        <div id="app-order-modal" class="modal-overlay" style="display: none;">
+          <div class="modal-content rewards-card" style="text-align: center; max-width: 320px;">
+            <div style="background: #003366; color: #fff; padding: 10px; margin: -24px -24px 16px -24px; border-radius: var(--radius-xl) var(--radius-xl) 0 0;">
+              <div style="font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 0.08em;">Govt. of Maharashtra</div>
+              <div style="font-size: 0.95rem; font-weight: 800;">Order Confirmed</div>
+            </div>
+            <div style="height: 3px; background: linear-gradient(to right, #FF9933 33.33%, #fff 33.33%, #fff 66.66%, #138808 66.66%); margin: -16px -24px 16px -24px;"></div>
+            <div style="border: 2px solid #138808; color: #138808; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; padding: 3px 10px; display: inline-block; letter-spacing: 0.08em; transform: rotate(-2deg); margin-bottom: 12px;">✓ ARTISAN CREDIT VERIFIED</div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;" id="app-receipt-item">—</div>
+            <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 12px;" id="app-receipt-artisan">—</div>
+            <div style="background: #f5f5f0; border: 1px dashed #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+              <div style="font-size: 0.6rem; color: #999; text-transform: uppercase; font-weight: 700;">Order Ref No.</div>
+              <code style="font-size: 1rem; font-weight: 800; color: #003366; letter-spacing: 0.05em;" id="app-receipt-code">MH-ECOB-00-0000</code>
+              <div style="font-size: 0.6rem; color: #138808; font-weight: 600; margin-top: 2px;">✓ Copied to clipboard</div>
+            </div>
+            <button class="btn btn-primary" id="app-close-order" style="width: 100%; font-size: 0.8rem;">Done</button>
+          </div>
+        </div>
+
+        <!-- SHARED BOTTOM NAVIGATION DOCK (thumb reachable, 4 tabs) -->
+        <nav class="bottom-nav">
+          <button class="nav-tab active" data-target="panel-home" aria-label="Home Screen">
+            <i data-lucide="map"></i>
+            <span>Home</span>
+          </button>
+          
+          <button class="nav-tab" data-target="panel-trips" aria-label="Saved Commutes">
+            <i data-lucide="compass"></i>
+            <span>Trips</span>
+          </button>
+          
+          <button class="nav-tab" data-target="panel-insights" aria-label="Sustainability Insights">
+            <i data-lucide="leaf"></i>
+            <span>Insights</span>
+          </button>
+          
+          <button class="nav-tab" data-target="panel-profile" aria-label="User Travel Profile">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+          </button>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Lucide Vector Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Leaflet JS for Maps -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Main Logic Script -->
+</body>
+</html>

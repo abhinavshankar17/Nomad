@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOMAD — Route Advisor Workspace</title>
+  
+  <!-- Leaflet CSS for Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Custom Design Styles -->
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body data-theme="light">
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="./index.html" class="nav-brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 22h20L12 2z"/>
+      </svg>
+      <span>NOMAD</span>
+    </a>
+    
+    <div class="nav-status">
+      <div class="status-indicator"></div>
+      <span>System active • Connected to Mumbai Metro & Transits</span>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+        <i data-lucide="moon" class="theme-icon-dark"></i>
+        <i data-lucide="sun" class="theme-icon-light" style="display: none;"></i>
+      </button>
+      <a href="./profile.html" class="btn btn-secondary">Travel Profile</a>
+      <a href="./app.html" class="btn btn-secondary">Launch App</a>
+      <a href="./index.html" class="btn btn-secondary">Back to Home</a>
+    </div>
+  </nav>
+
+  <!-- Main App Workspace Layout (Split-Screen) -->
+  <main class="app-layout">
+    
+    <!-- Left Panel: Immersive Interactive Map (70% width) -->
+    <div class="app-map-container">
+      <div id="map"></div>
+    </div>
+    
+    <!-- Right Panel: Decision & Analysis Panel (30% width) -->
+    <aside class="app-sidebar" id="decision-panel">
+      <div class="sidebar-header">
+        <div class="sidebar-tag">Advisor Workspace</div>
+        <h2>Commute Planner</h2>
+        <p class="sidebar-desc">Enter details to coordinate optimal routes across transit grids and highway links.</p>
+      </div>
+
+      <!-- Form Inputs -->
+      <form class="planner-form" id="planner-form">
+        <div class="input-group autocomplete-container">
+          <label for="input-origin">Origin</label>
+          <div class="input-wrapper">
+            <i data-lucide="map-pin" class="input-icon"></i>
+            <input type="text" id="input-origin" value="Chhatrapati Shivaji Maharaj Airport (BOM)" placeholder="Start location" autocomplete="off">
+          </div>
+          <div class="suggestions-list" id="origin-suggestions" style="display: none;"></div>
+        </div>
+
+        <div class="input-group autocomplete-container">
+          <label for="input-destination">Destination</label>
+          <div class="input-wrapper">
+            <i data-lucide="navigation" class="input-icon"></i>
+            <input type="text" id="input-destination" value="Bandra Kurla Complex (BKC)" placeholder="End destination" autocomplete="off">
+          </div>
+          <div class="suggestions-list" id="dest-suggestions" style="display: none;"></div>
+        </div>
+
+        <div class="input-group">
+          <label for="input-time">Departure Time</label>
+          <div class="input-wrapper">
+            <i data-lucide="clock" class="input-icon"></i>
+            <select id="input-time">
+              <option value="now">Leave Now</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-submit-plan" id="btn-analyze">
+          <i data-lucide="sparkles"></i> Analyze Route
+        </button>
+      </form>
+
+      <!-- Skeleton Loading State (Initially Hidden) -->
+      <div class="analysis-loader" id="analysis-loader" style="display: none;">
+        <div class="loader-message">
+          <div class="spinner-ring"></div>
+          <span>NOMAD Advisor is analyzing commuter paths...</span>
+        </div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line"></div>
+      </div>
+
+      <!-- Analysis Results Dashboard (Initially Hidden) -->
+      <div class="analysis-results" id="analysis-results" style="display: none;">
+        <h3 class="results-heading">Advisor Insights</h3>
+        
+        <div class="perspectives-grid">
+          <!-- Time Perspective -->
+          <div class="perspective-card time-border">
+            <div class="perspective-header">
+              <i data-lucide="clock"></i>
+              <h4>Time Perspective</h4>
+            </div>
+            <p id="time-reasoning">Analyzing schedule queues...</p>
+          </div>
+
+          <!-- Cost Perspective -->
+          <div class="perspective-card cost-border">
+            <div class="perspective-header">
+              <i data-lucide="wallet"></i>
+              <h4>Cost Perspective</h4>
+            </div>
+            <p id="cost-reasoning">Calculating fares and fees...</p>
+          </div>
+
+          <!-- Safety Perspective -->
+          <div class="perspective-card safety-border">
+            <div class="perspective-header">
+              <i data-lucide="shield-check"></i>
+              <h4>Safety Perspective</h4>
+            </div>
+            <p id="safety-reasoning">Checking lane ratings and crowd density...</p>
+          </div>
+
+          <!-- Environmental Perspective -->
+          <div class="perspective-card env-border">
+            <div class="perspective-header">
+              <i data-lucide="leaf"></i>
+              <h4>Environmental Perspective</h4>
+            </div>
+            <p id="env-reasoning">Measuring carbon impact levels...</p>
+          </div>
+        </div>
+
+        <!-- Advisor Recommendation Card -->
+        <div class="recommended-decision-card" id="decision-card">
+          <div class="rec-badge">Recommended Decision</div>
+          <h3 class="rec-mode" id="rec-mode">Take Metro Line 2</h3>
+          
+          <div class="rec-metrics">
+            <div class="metric-item">
+              <i data-lucide="zap"></i>
+              <span id="metric-time">43 mins</span>
+            </div>
+            <div class="metric-item">
+              <i data-lucide="indian-rupee"></i>
+              <span id="metric-cost">₹20 cheaper</span>
+            </div>
+            <div class="metric-item">
+              <i data-lucide="leaf"></i>
+              <span id="metric-carbon">75% lower emissions</span>
+            </div>
+            <div class="metric-item">
+              <i data-lucide="award"></i>
+              <span id="metric-safety">Highest safety score</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- Lucide Vector Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Leaflet JS for Maps -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Main Logic Script -->
+  <script src="./planner.js" type="module"></script>
+</body>
+</html>

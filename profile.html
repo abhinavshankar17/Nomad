@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOMAD — Your Travel Profile</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Review your commuting metrics, carbon savings, and preferred transit patterns inside your Nomad Travel Profile.">
+  
+  <!-- Custom Design Styles -->
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body data-theme="light">
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="./index.html" class="nav-brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 22h20L12 2z"/>
+      </svg>
+      <span>NOMAD</span>
+    </a>
+    
+    <div class="nav-status">
+      <div class="status-indicator"></div>
+      <span>All personal travel analytics synchronized</span>
+    </div>
+    
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+        <i data-lucide="moon" class="theme-icon-dark"></i>
+        <i data-lucide="sun" class="theme-icon-light" style="display: none;"></i>
+      </button>
+      <a href="./app.html" class="btn btn-secondary">Launch App</a>
+      <a href="./index.html" class="btn btn-secondary">Back to Home</a>
+    </div>
+  </nav>
+
+  <!-- Main Profile Container -->
+  <main class="profile-layout">
+    
+    <!-- Hero Header: Apple Health / Spotify Wrapped Style -->
+    <header class="profile-hero">
+      <div class="profile-hero-content">
+        <div class="profile-hero-tag">Mobility Insights</div>
+        <h1 class="profile-hero-title">Your Travel Profile</h1>
+        <p class="profile-hero-desc">
+          Review your commuting metrics, savings, and ecological impact. Nomad dynamically tracks and summarizes your weekly transit passes and active choices.
+        </p>
+      </div>
+      
+      <!-- Apple Health style circular activity ring -->
+      <div class="health-ring-container">
+        <svg class="health-ring-svg">
+          <circle class="health-ring-bg" cx="50" cy="50" r="40" />
+          <circle class="health-ring-active" id="carbon-ring" cx="50" cy="50" r="40" />
+        </svg>
+        <div class="health-ring-info">
+          <span class="health-ring-value">142 kg</span>
+          <span class="health-ring-label">CO₂ Reduced</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Core Statistics Cards Grid -->
+    <section class="profile-grid">
+      <!-- Card 1: Average Commute Time -->
+      <article class="wrapped-card card-time-wrapped">
+        <div class="wrapped-card-header">
+          <h3>Average Commute</h3>
+          <i data-lucide="zap" class="wrapped-card-icon"></i>
+        </div>
+        <div class="wrapped-card-body">
+          <div class="wrapped-card-value">36m</div>
+          <p class="wrapped-card-desc">4 minutes faster than local area average delays.</p>
+        </div>
+      </article>
+
+      <!-- Card 2: Money Spent -->
+      <article class="wrapped-card card-money-wrapped">
+        <div class="wrapped-card-header">
+          <h3>Monthly Spent</h3>
+          <i data-lucide="wallet" class="wrapped-card-icon"></i>
+        </div>
+        <div class="wrapped-card-body">
+          <div class="wrapped-card-value">₹1,240</div>
+          <p class="wrapped-card-desc">₹460 saved compared to rideshare defaults.</p>
+        </div>
+      </article>
+
+      <!-- Card 3: Carbon Saved Converted to Points -->
+      <article class="wrapped-card card-carbon-wrapped">
+        <div class="wrapped-card-header">
+          <h3>NOMAD Eco Points</h3>
+          <i data-lucide="leaf" class="wrapped-card-icon"></i>
+        </div>
+        <div class="wrapped-card-body">
+          <div class="wrapped-card-value" id="profile-points-val">142</div>
+          <p class="wrapped-card-desc">142 kg CO₂ reduced (1kg = 1 Eco Point). Redeem for artisan crafts.</p>
+          <button class="btn btn-primary" id="btn-redeem-profile" style="margin-top: 12px; width: 100%; padding: 8px 12px; font-size: 0.8rem; border-radius: var(--radius-md); font-weight: 700; background: var(--text-primary); color: var(--bg-primary);">Redeem Points</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Details Section -->
+    <section class="profile-details-grid">
+      <!-- Left Card: Mode Distribution Chart -->
+      <div class="details-card">
+        <h2 class="details-card-title">Preferred transportation methods</h2>
+        <div class="transport-distribution">
+          <!-- Circular Donut Segment Chart -->
+          <svg class="donut-chart-svg" viewBox="0 0 100 100">
+            <!-- Segments: Metro 55%, E-bike 30%, Rideshare 15% -->
+            <!-- Stroke dash-arrays: total circumference is 251.2 (2 * PI * 40) -->
+            <!-- Metro = 55% = 138.16 -->
+            <!-- E-bike = 30% = 75.36 -->
+            <!-- Rideshare = 15% = 37.68 -->
+            <circle class="donut-segment" stroke="var(--color-time)" stroke-dasharray="0 251.2" stroke-dashoffset="0" cx="50" cy="50" r="40" id="donut-segment-metro" />
+            <circle class="donut-segment" stroke="var(--color-carbon)" stroke-dasharray="0 251.2" stroke-dashoffset="-138.16" cx="50" cy="50" r="40" id="donut-segment-bike" />
+            <circle class="donut-segment" stroke="#e28743" stroke-dasharray="0 251.2" stroke-dashoffset="-213.52" cx="50" cy="50" r="40" id="donut-segment-ride" />
+          </svg>
+          
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-label-group">
+                <div class="legend-color" style="background-color: var(--color-time);"></div>
+                <span>Metro Transit</span>
+              </div>
+              <span class="legend-val">55%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label-group">
+                <div class="legend-color" style="background-color: var(--color-carbon);"></div>
+                <span>Eco E-Bike</span>
+              </div>
+              <span class="legend-val">30%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-label-group">
+                <div class="legend-color" style="background-color: #e28743;"></div>
+                <span>Rideshare</span>
+              </div>
+              <span class="legend-val">15%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Card: Frequented Destination list -->
+      <div class="details-card">
+        <h2 class="details-card-title">Frequent Destinations</h2>
+        <div class="destination-list">
+          <div class="destination-item">
+            <div class="dest-number-badge">1</div>
+            <div class="dest-details">
+              <div class="dest-name">Bandra Kurla Complex (BKC)</div>
+              <div class="dest-meta">
+                <span>18 commute links</span>
+                <span style="color: var(--color-carbon);">E-bike preferred</span>
+              </div>
+            </div>
+          </div>
+          <div class="destination-item">
+            <div class="dest-number-badge">2</div>
+            <div class="dest-details">
+              <div class="dest-name">Chhatrapati Shivaji Maharaj Airport (BOM)</div>
+              <div class="dest-meta">
+                <span>8 commute links</span>
+                <span style="color: var(--color-time);">Metro preferred</span>
+              </div>
+            </div>
+          </div>
+          <div class="destination-item">
+            <div class="dest-number-badge">3</div>
+            <div class="dest-details">
+              <div class="dest-name">Nariman Point District</div>
+              <div class="dest-meta">
+                <span>6 commute links</span>
+                <span style="color: var(--color-time);">Transit preferred</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sustainability Dashboard Section -->
+    <section class="details-card" style="width: 100%;">
+      <div class="wrapped-badge" style="background: linear-gradient(135deg, var(--color-carbon) 0%, var(--color-money) 100%);">Sustainability Dashboard</div>
+      <h2 class="details-card-title" style="margin-top: -12px;">This Month's Ecological Footprint</h2>
+      
+      <!-- Sustainability Cards (Carbon Saved, Equivalent Trees, Fuel Cost Saved) -->
+      <div class="sustainability-summary-grid">
+        <div class="sustainability-metric-card">
+          <div class="sustainability-card-icon" style="background-color: var(--color-carbon-light); color: var(--color-carbon);">
+            <i data-lucide="leaf"></i>
+          </div>
+          <div class="sustainability-card-info">
+            <span class="sustainability-val">142 kg</span>
+            <span class="sustainability-label">Carbon Saved</span>
+            <p class="sustainability-story">Bypassed tailpipe emissions, preventing 142 kg of greenhouse gases from entering the local atmosphere.</p>
+          </div>
+        </div>
+        
+        <div class="sustainability-metric-card">
+          <div class="sustainability-card-icon" style="background-color: rgba(13, 148, 136, 0.1); color: var(--color-money);">
+            <i data-lucide="tree-pine"></i>
+          </div>
+          <div class="sustainability-card-info">
+            <span class="sustainability-val">6.8 Trees</span>
+            <span class="sustainability-label">Equivalent Offset</span>
+            <p class="sustainability-story">Your green choices did the work of 6.8 mature trees absorbing CO₂ for a full month.</p>
+          </div>
+        </div>
+
+        <div class="sustainability-metric-card">
+          <div class="sustainability-card-icon" style="background-color: rgba(226, 135, 67, 0.1); color: #e28743;">
+            <i data-lucide="fuel"></i>
+          </div>
+          <div class="sustainability-card-info">
+            <span class="sustainability-val">₹4,820</span>
+            <span class="sustainability-label">Fuel Cost Saved</span>
+            <p class="sustainability-story">Skipping highway fuel tariffs and toll costs saved your wallet ₹4,820 this month.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mode Emissions Comparison (Storytelling & Horizontal Bars) -->
+      <div class="sustainability-comparison">
+        <h3 class="comparison-title">Commute Emissions Comparison</h3>
+        <p class="comparison-subtitle">See how your transit options compare in carbon footprint per passenger-kilometer.</p>
+        
+        <div class="comparison-list">
+          <!-- Walking -->
+          <div class="comparison-row">
+            <div class="comparison-mode">
+              <i data-lucide="footprints" style="color: var(--color-carbon);"></i>
+              <span>Walking</span>
+            </div>
+            <div class="comparison-bar-cell">
+              <div class="comparison-bar-wrapper">
+                <div class="comparison-bar" style="width: 0%; background-color: var(--color-carbon);"></div>
+              </div>
+              <span class="comparison-metrics">0g CO₂/km</span>
+            </div>
+            <p class="comparison-story-text">Zero footprint. The cleanest, healthiest human-powered commute.</p>
+          </div>
+
+          <!-- Bike -->
+          <div class="comparison-row">
+            <div class="comparison-mode">
+              <i data-lucide="bike" style="color: var(--color-carbon);"></i>
+              <span>Eco E-Bike</span>
+            </div>
+            <div class="comparison-bar-cell">
+              <div class="comparison-bar-wrapper">
+                <div class="comparison-bar" style="width: 0%; background-color: var(--color-carbon);" id="bar-bike"></div>
+              </div>
+              <span class="comparison-metrics">8g CO₂/km</span>
+            </div>
+            <p class="comparison-story-text">Ultra-efficient lanes. Minimal carbon from localized electrical charging grids.</p>
+          </div>
+
+          <!-- Metro -->
+          <div class="comparison-row">
+            <div class="comparison-mode">
+              <i data-lucide="train" style="color: var(--color-time);"></i>
+              <span>Metro Line 2</span>
+            </div>
+            <div class="comparison-bar-cell">
+              <div class="comparison-bar-wrapper">
+                <div class="comparison-bar" style="width: 0%; background-color: var(--color-time);" id="bar-metro"></div>
+              </div>
+              <span class="comparison-metrics">14g CO₂/km</span>
+            </div>
+            <p class="comparison-story-text">High-speed mass transit. Extremely low footprint through centralized passenger density.</p>
+          </div>
+
+          <!-- Bus -->
+          <div class="comparison-row">
+            <div class="comparison-mode">
+              <i data-lucide="bus" style="color: var(--color-money);"></i>
+              <span>City Shuttle Bus</span>
+            </div>
+            <div class="comparison-bar-cell">
+              <div class="comparison-bar-wrapper">
+                <div class="comparison-bar" style="width: 0%; background-color: var(--color-money);" id="bar-bus"></div>
+              </div>
+              <span class="comparison-metrics">35g CO₂/km</span>
+            </div>
+            <p class="comparison-story-text">Shared expressway transit. Density scales down individual footprints over standard routes.</p>
+          </div>
+
+          <!-- Car -->
+          <div class="comparison-row">
+            <div class="comparison-mode">
+              <i data-lucide="car" style="color: #e28743;"></i>
+              <span>Private Car (Car)</span>
+            </div>
+            <div class="comparison-bar-cell">
+              <div class="comparison-bar-wrapper">
+                <div class="comparison-bar" style="width: 0%; background-color: #e28743;" id="bar-car"></div>
+              </div>
+              <span class="comparison-metrics">192g CO₂/km</span>
+            </div>
+            <p class="comparison-story-text">Combustion baseline. High solo emissions and gridlock footprint.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Monthly Patterns Line Graph -->
+    <section class="details-card" style="width: 100%;">
+      <div class="wrapped-badge">Monthly travel patterns</div>
+      <h2 class="details-card-title" style="margin-top: -12px;"> Commute Frequency Trend</h2>
+      
+      <div class="chart-container">
+        <!-- SVG Interactive Graph -->
+        <svg class="chart-svg" viewBox="0 0 800 200">
+          <defs>
+            <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          
+          <!-- Y-axis reference grid lines -->
+          <line class="chart-grid-line" x1="50" y1="40" x2="780" y2="40" />
+          <line class="chart-grid-line" x1="50" y1="95" x2="780" y2="95" />
+          <line class="chart-grid-line" x1="50" y1="150" x2="780" y2="150" />
+          
+          <!-- Grid labels -->
+          <text class="chart-axis-label chart-axis-y" x="40" y="45">80 trips</text>
+          <text class="chart-axis-label chart-axis-y" x="40" y="100">40 trips</text>
+          <text class="chart-axis-label chart-axis-y" x="40" y="155">0 trips</text>
+
+          <!-- SVG Paths for area and lines -->
+          <path class="chart-area-path" id="chart-area" d="M 50 150 L 50 150 L 196 150 L 342 150 L 488 150 L 634 150 L 780 150 Z" />
+          <path class="chart-line-path" id="chart-line" d="M 50 150 L 50 150 L 196 150 L 342 150 L 488 150 L 634 150 L 780 150" />
+
+          <!-- Axis months labels -->
+          <text class="chart-axis-label" x="50" y="180">Jan</text>
+          <text class="chart-axis-label" x="196" y="180">Feb</text>
+          <text class="chart-axis-label" x="342" y="180">Mar</text>
+          <text class="chart-axis-label" x="488" y="180">Apr</text>
+          <text class="chart-axis-label" x="634" y="180">May</text>
+          <text class="chart-axis-label" x="780" y="180">Jun</text>
+
+          <!-- Interactive circle points -->
+          <!-- Coordinates: Jan: 42 trips (y=92), Feb: 48 trips (y=84), Mar: 55 trips (y=74), Apr: 52 trips (y=78), May: 60 (y=67), Jun: 72 (y=51) -->
+          <circle class="chart-point" id="pt-0" cx="50" cy="150" r="5" data-val="42 trips" data-month="Jan" />
+          <circle class="chart-point" id="pt-1" cx="196" cy="150" r="5" data-val="48 trips" data-month="Feb" />
+          <circle class="chart-point" id="pt-2" cx="342" cy="150" r="5" data-val="55 trips" data-month="Mar" />
+          <circle class="chart-point" id="pt-3" cx="488" cy="150" r="5" data-val="52 trips" data-month="Apr" />
+          <circle class="chart-point" id="pt-4" cx="634" cy="150" r="5" data-val="60 trips" data-month="May" />
+          <circle class="chart-point" id="pt-5" cx="780" cy="150" r="5" data-val="72 trips" data-month="Jun" />
+        </svg>
+        
+        <!-- Interactive Chart Tooltip -->
+        <div class="chart-tooltip" id="chart-tooltip"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Clean minimalist Footer -->
+  <footer class="footer">
+    <nav class="footer-nav">
+      <a href="#" class="footer-link">System Status</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+      <a href="#" class="footer-link">Terms of Service</a>
+      <a href="#" class="footer-link">Developer API</a>
+    </nav>
+    <div class="footer-copy">
+      &copy; 2026 NOMAD Technologies, Inc. All analytics secure.
+    </div>
+  </footer>
+
+
+
+  <!-- Lucide Vector Icons Library -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Dynamic Profile Workspace Script -->
+  <script src="./profile.js" type="module"></script>
+</body>
+</html>

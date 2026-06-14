@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maha Eco-Bazaar | Government of Maharashtra | Rural Artisan Livelihood Portal</title>
+  <meta name="description" content="Official Government of Maharashtra portal for redeeming NOMAD Eco Points for authentic rural artisan crafts and handloom products.">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === INDIAN GOVERNMENT PORTAL DESIGN SYSTEM === */
+    :root {
+      --gov-blue: #003366;
+      --gov-blue-dark: #001f3f;
+      --gov-blue-light: #004080;
+      --gov-saffron: #FF9933;
+      --gov-white: #FFFFFF;
+      --gov-green: #138808;
+      --gov-navy: #06038D;
+      --gov-chakra-blue: #000080;
+      --gov-bg: #f0f0f0;
+      --gov-card-bg: #ffffff;
+      --gov-border: #cccccc;
+      --gov-text: #333333;
+      --gov-text-light: #666666;
+      --gov-link: #003366;
+      --gov-highlight: #ffffcc;
+      --gov-success: #28a745;
+      --gov-red: #dc3545;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      color: var(--gov-text);
+      background-color: var(--gov-bg);
+      line-height: 1.6;
+    }
+
+    a { color: var(--gov-link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* === TOP ACCESSIBILITY BAR === */
+    .accessibility-bar {
+      background-color: var(--gov-blue-dark);
+      color: #ccc;
+      font-size: 11px;
+      padding: 4px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .accessibility-bar a {
+      color: #aaccee;
+      margin: 0 8px;
+      font-size: 11px;
+    }
+    .accessibility-bar a:hover { color: #fff; }
+    .font-size-controls { display: flex; align-items: center; gap: 2px; }
+    .font-size-controls button {
+      background: none; border: 1px solid #555;
+      color: #ccc; padding: 1px 6px; cursor: pointer;
+      font-size: 11px; border-radius: 2px;
+    }
+    .font-size-controls button:hover { background: #555; color: #fff; }
+
+    /* === TRICOLOR STRIPE === */
+    .tricolor-stripe {
+      height: 6px;
+      background: linear-gradient(to right, var(--gov-saffron) 33.33%, var(--gov-white) 33.33%, var(--gov-white) 66.66%, var(--gov-green) 66.66%);
+    }
+
+    /* === MAIN GOVERNMENT HEADER === */
+    .gov-header {
+      background-color: var(--gov-card-bg);
+      border-bottom: 2px solid var(--gov-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .emblem-container {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .emblem-svg {
+      width: 56px;
+      height: 56px;
+    }
+    .gov-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .gov-title-hindi {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gov-blue);
+      letter-spacing: 0.02em;
+    }
+    .gov-title-english {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gov-blue-dark);
+      letter-spacing: -0.01em;
+    }
+    .gov-subtitle {
+      font-size: 11px;
+      color: var(--gov-text-light);
+      font-weight: 500;
+    }
+    .gov-header-right {
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .gov-swachh-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background-color: var(--gov-green);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .digital-india-text {
+      font-size: 10px;
+      color: var(--gov-text-light);
+      font-style: italic;
+    }
+
+    /* === NAVIGATION BAR === */
+    .gov-nav {
+      background-color: var(--gov-blue);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+    }
+    .gov-nav a {
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-block;
+      border-right: 1px solid rgba(255,255,255,0.15);
+      transition: background 0.2s;
+    }
+    .gov-nav a:first-child { border-left: 1px solid rgba(255,255,255,0.15); }
+    .gov-nav a:hover { background-color: var(--gov-blue-light); text-decoration: none; }
+    .gov-nav a.active-nav { background-color: var(--gov-saffron); color: var(--gov-blue-dark); }
+
+    /* === BREADCRUMB === */
+    .breadcrumb-bar {
+      background-color: #e8e8e8;
+      border-bottom: 1px solid var(--gov-border);
+      padding: 6px 24px;
+      font-size: 12px;
+      color: var(--gov-text-light);
+    }
+    .breadcrumb-bar a { color: var(--gov-blue); font-size: 12px; }
+
+    /* === PAGE CONTENT WRAPPER === */
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: flex;
+      gap: 20px;
+    }
+
+    /* === SIDEBAR === */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sidebar-box {
+      background-color: var(--gov-card-bg);
+      border: 1px solid var(--gov-border);
+    }
+    .sidebar-box-header {
+      background-color: var(--gov-blue);
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .sidebar-box-body {
+      padding: 12px;
+    }
+    .points-display {
+      text-align: center;
+      padding: 8px 0;
+    }
+    .points-number {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--gov-green);
+      line-height: 1.1;
+    }
+    .points-label {
+      font-size: 12px;
+      color: var(--gov-text-light);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+    .points-equiv {
+      font-size: 11px;
+      color: var(--gov-text-light);
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--gov-border);
+    }
+    .category-list {
+      list-style: none;
+      padding: 0;
+    }
+    .category-list li {
+      border-bottom: 1px solid #eee;
+    }
+    .category-list li:last-child { border-bottom: none; }
+    .category-list li a,
+    .category-list li button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--gov-link);
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .category-list li a:hover,
+    .category-list li button:hover { background-color: #f5f5f5; text-decoration: none; }
+    .category-list li button.cat-active {
+      background-color: var(--gov-blue);
+      color: #fff;
+      font-weight: 700;
+    }
+    .helpline-box {
+      font-size: 12px;
+      color: var(--gov-text-light);
+      line-height: 1.6;
+    }
+    .helpline-box strong {
+      color: var(--gov-text);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .helpline-number {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gov-blue);
+    }
+
+    /* === MAIN CONTENT === */
+    .main-content {
+      flex-grow: 1;
+      min-width: 0;
+    }
+    .section-heading {
+      background-color: var(--gov-blue);
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 0;
+      border: 1px solid var(--gov-blue);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-heading .item-count {
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+    .notice-bar {
+      background-color: var(--gov-highlight);
+      border: 1px solid #e6d700;
+      border-top: none;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #665500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notice-bar strong { color: var(--gov-red); }
+
+    /* === PRODUCT TABLE-STYLE CARDS === */
+    .product-list {
+      border: 1px solid var(--gov-border);
+      border-top: none;
+    }
+    .product-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 140px 120px;
+      background-color: var(--gov-card-bg);
+      border-bottom: 1px solid #e0e0e0;
+      align-items: center;
+      transition: background 0.15s;
+    }
+    .product-row:hover { background-color: #f9f9f5; }
+    .product-row:last-child { border-bottom: none; }
+    .product-thumb {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f0;
+      border-right: 1px solid #e8e8e8;
+      color: var(--gov-green);
+      font-size: 28px;
+    }
+    .product-thumb svg {
+      width: 32px;
+      height: 32px;
+    }
+    .product-info {
+      padding: 12px 16px;
+    }
+    .product-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gov-blue-dark);
+      margin-bottom: 2px;
+    }
+    .artisan-line {
+      font-size: 11px;
+      color: var(--gov-text-light);
+      margin-bottom: 4px;
+    }
+    .artisan-line em {
+      font-style: normal;
+      color: var(--gov-green);
+      font-weight: 600;
+    }
+    .product-desc-text {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.4;
+    }
+    .product-type-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      background-color: #e8f4e8;
+      color: var(--gov-green);
+      padding: 1px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .product-price-col {
+      text-align: center;
+      padding: 12px;
+      border-left: 1px solid #e8e8e8;
+    }
+    .price-points {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gov-blue-dark);
+      line-height: 1;
+    }
+    .price-subtext {
+      font-size: 10px;
+      color: var(--gov-text-light);
+      margin-top: 2px;
+    }
+    .product-action-col {
+      text-align: center;
+      padding: 12px;
+      border-left: 1px solid #e8e8e8;
+    }
+    .btn-gov {
+      display: inline-block;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-family: inherit;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-gov-primary {
+      background-color: var(--gov-green);
+      color: #fff;
+    }
+    .btn-gov-primary:hover { background-color: #0f6b06; }
+    .btn-gov-primary:disabled {
+      background-color: #aaa;
+      color: #eee;
+      cursor: not-allowed;
+    }
+    .btn-gov-blue {
+      background-color: var(--gov-blue);
+      color: #fff;
+    }
+    .btn-gov-blue:hover { background-color: var(--gov-blue-dark); }
+
+    /* === RECEIPT MODAL === */
+    .receipt-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-color: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      padding: 20px;
+    }
+    .receipt-paper {
+      background-color: #fff;
+      border: 2px solid var(--gov-blue);
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+    }
+    .receipt-header-stripe {
+      background-color: var(--gov-blue);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .receipt-header-stripe svg {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .receipt-header-stripe h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .receipt-header-stripe span {
+      font-size: 11px;
+      opacity: 0.75;
+      display: block;
+    }
+    .receipt-tricolor {
+      height: 4px;
+      background: linear-gradient(to right, var(--gov-saffron) 33.33%, #fff 33.33%, #fff 66.66%, var(--gov-green) 66.66%);
+    }
+    .receipt-body {
+      padding: 20px;
+    }
+    .receipt-seal-row {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .receipt-stamp {
+      display: inline-block;
+      border: 2px solid var(--gov-green);
+      color: var(--gov-green);
+      padding: 4px 14px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transform: rotate(-2deg);
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .receipt-table th {
+      text-align: left;
+      background-color: #f0f0f0;
+      padding: 8px 10px;
+      font-weight: 600;
+      border: 1px solid #ddd;
+      color: var(--gov-text-light);
+      width: 40%;
+    }
+    .receipt-table td {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      font-weight: 700;
+      color: var(--gov-text);
+    }
+    .order-code-box {
+      background-color: #f5f5f0;
+      border: 1px dashed var(--gov-border);
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+    .order-code-box .code-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--gov-text-light);
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+    .order-code-box code {
+      display: block;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gov-blue);
+      letter-spacing: 0.08em;
+      margin: 4px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .order-code-box .copy-note {
+      font-size: 11px;
+      color: var(--gov-green);
+      font-weight: 600;
+    }
+    .receipt-footer-note {
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 12px;
+      line-height: 1.5;
+    }
+    .receipt-close-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    /* === GOVERNMENT FOOTER === */
+    .gov-footer {
+      background-color: var(--gov-blue-dark);
+      color: #aaa;
+      font-size: 11px;
+      padding: 16px 24px;
+      margin-top: 40px;
+      border-top: 3px solid var(--gov-saffron);
+    }
+    .gov-footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .gov-footer a { color: #88bbdd; font-size: 11px; }
+    .nic-badge {
+      font-size: 10px;
+      color: #88bbdd;
+      font-weight: 600;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      .page-wrapper { flex-direction: column; padding: 12px; }
+      .sidebar { width: 100%; }
+      .product-row {
+        grid-template-columns: 60px 1fr;
+        grid-template-rows: auto auto;
+      }
+      .product-price-col,
+      .product-action-col {
+        border-left: none;
+        border-top: 1px solid #e8e8e8;
+        grid-column: span 2;
+        text-align: left;
+        padding: 8px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .product-info { grid-column: 1; }
+      .gov-header { flex-wrap: wrap; }
+      .gov-header-right { display: none; }
+      .accessibility-bar { flex-wrap: wrap; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Accessibility Top Bar -->
+  <div class="accessibility-bar">
+    <div>
+      <a href="#main-content">Skip to Main Content</a> |
+      <a href="#" title="Screen Reader Access">Screen Reader Access</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="font-size-controls">
+        <span>Text Size:</span>
+        <button title="Decrease text size">A-</button>
+        <button title="Normal text size">A</button>
+        <button title="Increase text size">A+</button>
+      </div>
+      <span>|</span>
+      <span>Last Updated: 14 Jun 2026</span>
+    </div>
+  </div>
+
+  <!-- Tricolor Stripe -->
+  <div class="tricolor-stripe"></div>
+
+  <!-- Main Government Header -->
+  <header class="gov-header">
+    <div class="emblem-container">
+      <!-- Simplified Ashoka Lion Capital SVG -->
+      <svg class="emblem-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="40" r="28" fill="none" stroke="#003366" stroke-width="3"/>
+        <text x="50" y="38" text-anchor="middle" font-size="14" font-weight="800" fill="#003366" font-family="serif">☸</text>
+        <text x="50" y="52" text-anchor="middle" font-size="7" font-weight="700" fill="#003366" font-family="serif">सत्यमेव जयते</text>
+        <line x1="25" y1="70" x2="75" y2="70" stroke="#003366" stroke-width="2"/>
+        <rect x="22" y="72" width="56" height="5" rx="1" fill="#003366" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="gov-title-block">
+      <span class="gov-title-hindi">महाराष्ट्र शासन — ग्रामीण जीवनोपार्जन विभाग</span>
+      <span class="gov-title-english">Maha Eco-Bazaar</span>
+      <span class="gov-subtitle">Government of Maharashtra | Dept. of Rural Livelihood & Sustainability</span>
+    </div>
+    <div class="gov-header-right">
+      <span class="gov-swachh-badge">🌿 Green India Mission</span>
+      <span class="digital-india-text">A Digital India Initiative</span>
+    </div>
+  </header>
+
+  <!-- Navigation Bar -->
+  <nav class="gov-nav">
+    <a href="./profile.html">← Back to NOMAD</a>
+    <a href="#" class="active-nav">Artisan Crafts</a>
+    <a href="#">Handlooms</a>
+    <a href="#">Organic Foods</a>
+    <a href="#">My Orders</a>
+    <a href="#">Help Desk</a>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar">
+    <a href="./index.html">Home</a> &raquo;
+    <a href="./profile.html">Travel Profile</a> &raquo;
+    <strong>Maha Eco-Bazaar — Redeem Eco Points</strong>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page-wrapper" id="main-content">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      
+      <!-- Eco Points Balance -->
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">Citizen Eco Points Account</div>
+        <div class="sidebar-box-body">
+          <div class="points-display">
+            <div class="points-number" id="points-val">142</div>
+            <div class="points-label">Eco Points Available</div>
+            <div class="points-equiv">1 Point = 1 Kg CO₂ Saved<br>Equivalent: ₹10 per Point</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Categories -->
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">Product Categories</div>
+        <div class="sidebar-box-body" style="padding: 0;">
+          <ul class="category-list">
+            <li><button class="cat-active" data-cat="all">All Categories (6)</button></li>
+            <li><button data-cat="apparel">Handlooms & Textiles (2)</button></li>
+            <li><button data-cat="crafts">Artisan Crafts & Home (2)</button></li>
+            <li><button data-cat="food">Organic Foods (1)</button></li>
+            <li><button data-cat="art">Tribal Art (1)</button></li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Helpline -->
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">Citizen Help Desk</div>
+        <div class="sidebar-box-body helpline-box">
+          <strong>Toll-Free Helpline:</strong>
+          <div class="helpline-number">1800-233-4567</div>
+          <br>
+          <strong>Email Support:</strong>
+          eco-bazaar@maharashtra.gov.in
+          <br><br>
+          <strong>Office Hours:</strong>
+          Mon–Sat: 09:30 AM – 05:30 PM
+        </div>
+      </div>
+
+      <!-- Important Links -->
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">Important Links</div>
+        <div class="sidebar-box-body" style="padding: 0;">
+          <ul class="category-list">
+            <li><a href="#">GeM Portal</a></li>
+            <li><a href="#">Khadi & Village Industries</a></li>
+            <li><a href="#">Maharashtra Tourism</a></li>
+            <li><a href="#">Right to Information</a></li>
+            <li><a href="#">Grievance Redressal</a></li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      
+      <div class="section-heading">
+        Available Artisan Products
+        <span class="item-count" id="item-count-label">Showing 6 items</span>
+      </div>
+      
+      <div class="notice-bar">
+        <strong>📢 Notice:</strong>
+        All products are sourced directly from verified Self-Help Groups (SHGs) and tribal cooperatives under the Maharashtra Rural Livelihoods Mission (MSRLM). GI-tagged where applicable.
+      </div>
+
+      <!-- Product Listing -->
+      <div class="product-list" id="product-list">
+
+        <!-- Item 1 -->
+        <div class="product-row" data-category="apparel">
+          <div class="product-thumb">
+            <i data-lucide="shirt"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Handloom</span>
+            <div class="product-name">Handwoven Khadi Scarf</div>
+            <div class="artisan-line">Artisan: <em>Savita Tai</em> — Wardha District (SHG: Gramin Mahila Bachat Gat)</div>
+            <div class="product-desc-text">Pure organic cotton, hand-spun and hand-woven. Natural plant dyes. Certified under Khadi Mark.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">60</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="60" data-reward="Handwoven Khadi Scarf" data-artisan="Savita Tai — Wardha SHG">Redeem</button>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="product-row" data-category="crafts">
+          <div class="product-thumb">
+            <i data-lucide="glass-water"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Bamboo Craft</span>
+            <div class="product-name">Gondia Bamboo Travel Bottle</div>
+            <div class="artisan-line">Artisan: <em>Ramdas Mandavi</em> — Gondia Forest Cooperative</div>
+            <div class="product-desc-text">Organic bamboo flask with hand-carved traditional patterns. Leak-proof natural cork seal. FSC certified forest harvest.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">40</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="40" data-reward="Gondia Bamboo Travel Bottle" data-artisan="Ramdas Mandavi — Gondia Cooperative">Redeem</button>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="product-row" data-category="crafts">
+          <div class="product-thumb">
+            <i data-lucide="cup-soda"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Pottery</span>
+            <div class="product-name">Dharavi Terracotta Water Pot</div>
+            <div class="artisan-line">Artisan: <em>Kumbhar Potters Guild</em> — Dharavi, Mumbai</div>
+            <div class="product-desc-text">Traditional red earth clay matka with evaporative cooling. Handmade by third-generation potters.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">30</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="30" data-reward="Dharavi Terracotta Water Pot" data-artisan="Kumbhar Potters Guild — Dharavi">Redeem</button>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="product-row" data-category="food">
+          <div class="product-thumb">
+            <i data-lucide="cherry"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Organic Food</span>
+            <div class="product-name">Melghat Wild Forest Honey (500g)</div>
+            <div class="artisan-line">Producer: <em>Korku Tribal Farmers Union</em> — Melghat Tiger Reserve, Amravati</div>
+            <div class="product-desc-text">Raw, unprocessed wild honey. Harvested using traditional non-destructive methods. FSSAI & Organic India certified.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">50</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="50" data-reward="Melghat Wild Forest Honey (500g)" data-artisan="Korku Tribal Farmers Union — Melghat">Redeem</button>
+          </div>
+        </div>
+
+        <!-- Item 5 -->
+        <div class="product-row" data-category="apparel">
+          <div class="product-thumb">
+            <i data-lucide="shopping-bag"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Handloom</span>
+            <div class="product-name">Solapur Handwoven Cotton Tote Bag</div>
+            <div class="artisan-line">Artisan: <em>Weavers Cooperative</em> — Solapur Handloom Cluster</div>
+            <div class="product-desc-text">Heavy-duty handloom cotton carry bag. Natural dyes. Biodegradable plastic-free alternative. GI-tagged Solapur textile.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">20</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="20" data-reward="Solapur Handwoven Cotton Tote Bag" data-artisan="Weavers Cooperative — Solapur">Redeem</button>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="product-row" data-category="art">
+          <div class="product-thumb">
+            <i data-lucide="lamp"></i>
+          </div>
+          <div class="product-info">
+            <span class="product-type-tag">Tribal Art</span>
+            <div class="product-name">Gadchiroli Dhokra Brass Oil Lamp</div>
+            <div class="artisan-line">Artisan: <em>Gadiya Lohar Collective</em> — Gadchiroli District (GI Tag Pending)</div>
+            <div class="product-desc-text">Lost-wax cast brass lamp. Ancient Dhokra metal craft tradition. Each piece is unique. Approx. 6" height.</div>
+          </div>
+          <div class="product-price-col">
+            <div class="price-points">100</div>
+            <div class="price-subtext">Eco Points</div>
+          </div>
+          <div class="product-action-col">
+            <button class="btn-gov btn-gov-primary redeem-btn" data-cost="100" data-reward="Gadchiroli Dhokra Brass Oil Lamp" data-artisan="Gadiya Lohar Collective — Gadchiroli">Redeem</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div style="background: #fff; border: 1px solid var(--gov-border); border-top: none; padding: 12px 16px; font-size: 11px; color: #999; line-height: 1.5;">
+        <strong style="color: #666;">Disclaimer:</strong> Products listed are provided by registered Self-Help Groups and tribal cooperatives under the Maharashtra State Rural Livelihoods Mission (MSRLM). The Government of Maharashtra acts as a facilitator and does not guarantee product specifications. For complaints, contact the District Rural Development Agency (DRDA). Orders are subject to availability and regional delivery timelines. Ref: GR No. MSRLM/ECO-2026/CR-47.
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Government Receipt Modal (hidden) -->
+  <div id="receipt-modal" class="receipt-overlay" style="display: none;">
+    <div class="receipt-paper">
+      <div class="receipt-header-stripe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <div>
+          <h3>Government of Maharashtra — Order Confirmation</h3>
+          <span>Dept. of Rural Livelihood & Sustainability</span>
+        </div>
+      </div>
+      <div class="receipt-tricolor"></div>
+      
+      <div class="receipt-body">
+        <div class="receipt-seal-row">
+          <div class="receipt-stamp">✓ VERIFIED — ARTISAN LIVELIHOOD CREDIT</div>
+        </div>
+        
+        <table class="receipt-table">
+          <tr><th>Product Claimed</th><td id="receipt-item-name">—</td></tr>
+          <tr><th>Artisan / SHG</th><td id="receipt-artisan-name">—</td></tr>
+          <tr><th>Livelihood Credit</th><td id="receipt-credit-val">—</td></tr>
+          <tr><th>Delivery Estimate</th><td>5–7 working days (India Post / MSRLM logistics)</td></tr>
+          <tr><th>Status</th><td style="color: var(--gov-green); font-weight: 800;">✓ APPROVED</td></tr>
+        </table>
+        
+        <div class="order-code-box">
+          <div class="code-label">Government Order Reference No.</div>
+          <code id="receipt-code-val">MH-ECOB-00-0000</code>
+          <div class="copy-note">✓ Code copied to clipboard</div>
+        </div>
+        
+        <div class="receipt-footer-note">
+          This order has been processed under the Maha Eco-Bazaar programme (GR No. MSRLM/ECO-2026/CR-47).<br>
+          For support, contact: <strong>1800-233-4567</strong> (Toll Free) or eco-bazaar@maharashtra.gov.in
+        </div>
+        
+        <button class="btn-gov btn-gov-blue receipt-close-btn" id="close-receipt-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Government Footer -->
+  <footer class="gov-footer">
+    <div class="gov-footer-inner">
+      <div>
+        © 2026 Government of Maharashtra. All Rights Reserved. |
+        <a href="#">Terms of Use</a> |
+        <a href="#">Privacy Policy</a> |
+        <a href="#">Accessibility Statement</a> |
+        <a href="#">Sitemap</a>
+      </div>
+      <div class="nic-badge">
+        Designed, Developed & Hosted by National Informatics Centre (NIC)
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Controller Script -->
+  <script src="./marketplace.js" type="module"></script>
+</body>
+</html>
