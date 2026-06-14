@@ -330,7 +330,89 @@ function generateShiftedCoords(coords, offsetLat, offsetLng) {
   return coords.map(c => [c[0] + offsetLat, c[1] + offsetLng]);
 }
 
-// 9. AI Decision Routing Engine
+// 9. AI Decision Routing Engine — CINEMATIC ADVISOR EXPERIENCE
+// Utility: async delay
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Utility: Speak a line using Web Speech API, returns a promise
+function speakLine(text) {
+  return new Promise((resolve) => {
+    if (!('speechSynthesis' in window)) {
+      // Fallback: just wait proportional to text length
+      setTimeout(resolve, text.length * 50 + 600);
+      return;
+    }
+
+    // Cancel any pending utterances
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.92;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    // Try to pick a good English voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v =>
+      v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Microsoft'))
+    ) || voices.find(v => v.lang.startsWith('en')) || null;
+
+    if (preferred) utterance.voice = preferred;
+
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+// Utility: Typewriter text display
+async function typewriterText(element, text, speed = 28) {
+  element.textContent = '';
+  for (let i = 0; i < text.length; i++) {
+    element.textContent += text[i];
+    await wait(speed);
+  }
+}
+
+// Utility: Animate a Leaflet polyline drawing (returns promise)
+function animatePolylineDraw(polylineLayer, durationMs = 1600) {
+  return new Promise((resolve) => {
+    const pathEl = polylineLayer.getElement();
+    if (!pathEl) { resolve(); return; }
+
+    const pathNode = pathEl.querySelector('path') || pathEl;
+    const length = pathNode.getTotalLength ? pathNode.getTotalLength() : 1000;
+
+    pathNode.style.strokeDasharray = `${length}`;
+    pathNode.style.strokeDashoffset = `${length}`;
+    pathNode.style.transition = `stroke-dash-offset ${durationMs}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+
+    // Force reflow
+    pathNode.getBoundingClientRect();
+
+    pathNode.style.strokeDashoffset = '0';
+    setTimeout(resolve, durationMs);
+  });
+}
+
+// AI Advisor DOM refs
+function getAIElements() {
+  return {
+    overlay: document.getElementById('ai-cinematic-overlay'),
+    orbContainer: document.getElementById('ai-orb-container'),
+    orb: document.getElementById('ai-orb'),
+    orbLabel: document.getElementById('ai-orb-label'),
+    transcriptBar: document.getElementById('ai-transcript-bar'),
+    transcriptText: document.getElementById('ai-transcript-text'),
+    analyzingHud: document.getElementById('ai-analyzing-hud'),
+  };
+}
+
+// Show/Hide AI elements
+function showAIElement(el) { if (el) el.classList.add('active'); }
+function hideAIElement(el) { if (el) el.classList.remove('active'); }
+
 async function handleFormSubmit(e) {
   e.preventDefault();
 
@@ -338,27 +420,33 @@ async function handleFormSubmit(e) {
   const results = document.getElementById('analysis-results');
   const submitBtn = document.getElementById('btn-analyze');
   const departureTime = document.getElementById('input-time').value;
+  const ai = getAIElements();
 
-  // Set loading state
+  // --- PHASE 0: Reset state & disable ---
   results.style.display = 'none';
-  loader.style.display = 'flex';
+  loader.style.display = 'none';
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i data-lucide="loader" class="spinner-ring" style="animation: spin-loop 0.8s linear infinite;"></i> Running AI Engine...';
+  submitBtn.innerHTML = '<i data-lucide="loader" class="spinner-ring" style="animation: spin-loop 0.8s linear infinite;"></i> Advisor Active...';
   lucide.createIcons();
 
   clearMapLayers();
   updateInputMarkers();
 
-  // 1. Fetch main base road path via OSRM
+  // Ensure voices are loaded (Chrome requires user gesture first)
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+  }
+
+  // --- PHASE 1: Fetch route data ---
   let routeData = await fetchRouteGeometry(originCoords, destCoords);
 
-  // Fallback simulator if ProjectOSRM fails
+  // Fallback simulator
   if (!routeData) {
     const startLat = originCoords.lat;
     const startLng = originCoords.lng;
     const endLat = destCoords.lat;
     const endLng = destCoords.lng;
-    
+
     const path = [];
     const segments = 6;
     for (let i = 0; i <= segments; i++) {
@@ -370,24 +458,20 @@ async function handleFormSubmit(e) {
       lng += offset;
       path.push([lat, lng]);
     }
-    
+
     const latDiff = endLat - startLat;
     const lngDiff = endLng - startLng;
     const distanceKm = parseFloat((Math.sqrt(latDiff * latDiff + lngDiff * lngDiff) * 111.3).toFixed(1));
     const durationMins = Math.max(8, Math.round(distanceKm * 1.8));
 
-    routeData = {
-      path: path,
-      durationMins: durationMins,
-      distanceKm: distanceKm
-    };
+    routeData = { path: path, durationMins: durationMins, distanceKm: distanceKm };
   }
 
   const baseCoords = routeData.path;
   const distance = routeData.distanceKm;
   const baseDuration = routeData.durationMins;
 
-  // Multipliers based on Departure Time
+  // Traffic multipliers
   let trafficFactor = 1.2;
   if (departureTime === 'morning') trafficFactor = 2.1;
   if (departureTime === 'later-1') trafficFactor = 1.5;
@@ -396,7 +480,7 @@ async function handleFormSubmit(e) {
   const isIndia = originCoords.lat >= 8 && originCoords.lat <= 37 && originCoords.lng >= 68 && originCoords.lng <= 97;
   const currency = isIndia ? "₹" : "$";
 
-  // Create 3 Options
+  // Travel options
   const travelOptions = {
     transit: {
       id: 'transit',
@@ -431,14 +515,14 @@ async function handleFormSubmit(e) {
   };
 
   const optionsList = [travelOptions.transit, travelOptions.ebike, travelOptions.rideshare];
-  
+
+  // AI Scoring
   optionsList.forEach(opt => {
     const timeScore = Math.max(0, 1 - (opt.duration / 120));
     const maxCost = isIndia ? 800 : 60;
     const costScore = Math.max(0, 1 - (opt.cost / maxCost));
     const safetyScore = opt.safety / 10;
     const envScore = opt.carbonOffset / 100;
-
     opt.aiScore = (timeScore * 0.40) + (costScore * 0.30) + (safetyScore * 0.20) + (envScore * 0.10);
   });
 
@@ -450,28 +534,190 @@ async function handleFormSubmit(e) {
   const safestOpt = optionsList.reduce((max, opt) => opt.safety > max.safety ? opt : max, optionsList[0]);
   const greenestOpt = optionsList.reduce((max, opt) => opt.carbonOffset > max.carbonOffset ? opt : max, optionsList[0]);
 
-  // Draw Route Polylines
-  optionsList.forEach(opt => {
+  const rideShareCost = travelOptions.rideshare.cost;
+  const savings = Math.max(0, rideShareCost - preferredOption.cost);
+
+  // ═══════════════════════════════════════════
+  // CINEMATIC SEQUENCE START
+  // ═══════════════════════════════════════════
+
+  // --- PHASE 2: Map zooms to route bounds ---
+  const group = L.featureGroup(mapMarkers);
+  map.fitBounds(group.getBounds(), { padding: [100, 100], animate: true, duration: 1.5 });
+  await wait(1600);
+
+  // --- PHASE 3: Cinematic overlay + analyzing HUD ---
+  showAIElement(ai.overlay);
+  await wait(400);
+  showAIElement(ai.analyzingHud);
+  await wait(2200);
+  hideAIElement(ai.analyzingHud);
+  await wait(400);
+
+  // --- PHASE 4: Draw route polylines with animation ---
+  const drawnPolylines = [];
+  for (const opt of optionsList) {
     const isPreferred = opt.id === preferredOption.id;
     const polyline = L.polyline(opt.coords, {
       color: isPreferred ? opt.color : '#86868b',
       weight: isPreferred ? 6 : 3,
-      opacity: isPreferred ? 0.9 : 0.4,
+      opacity: 0,
       dashArray: isPreferred ? '10, 10' : '5, 8',
       lineCap: 'round',
       lineJoin: 'round'
     }).addTo(map);
 
     routeLayers.push(polyline);
-    polyline.on('click', () => highlightSelectedRoute(opt));
+    drawnPolylines.push(polyline);
+  }
+
+  // Fit bounds with all routes now
+  const fullGroup = L.featureGroup([...mapMarkers, ...routeLayers]);
+  map.fitBounds(fullGroup.getBounds(), { padding: [80, 80], animate: true, duration: 1.0 });
+  await wait(800);
+
+  // Animate preferred route appearing first, then others
+  const preferredIdx = optionsList.findIndex(o => o.id === preferredOption.id);
+  
+  // Show preferred route with cinematic draw
+  drawnPolylines[preferredIdx].setStyle({ opacity: 0.9 });
+  const preferredPathEl = drawnPolylines[preferredIdx].getElement();
+  if (preferredPathEl) {
+    const pathNode = preferredPathEl.querySelector('path') || preferredPathEl;
+    const len = pathNode.getTotalLength ? pathNode.getTotalLength() : 1000;
+    pathNode.style.strokeDasharray = `${len}`;
+    pathNode.style.strokeDashoffset = `${len}`;
+    pathNode.style.transition = `stroke-dashoffset 1.8s cubic-bezier(0.4, 0, 0.2, 1)`;
+    pathNode.getBoundingClientRect();
+    pathNode.style.strokeDashoffset = '0';
+  }
+  await wait(1200);
+
+  // Show other routes fading in
+  drawnPolylines.forEach((pl, idx) => {
+    if (idx !== preferredIdx) {
+      pl.setStyle({ opacity: 0.35 });
+    }
   });
+  await wait(600);
 
-  const group = L.featureGroup([...mapMarkers, ...routeLayers]);
-  map.fitBounds(group.getBounds(), { padding: [60, 60] });
-
-  // Glow Vehicle Animation
+  // Start vehicle animation
   animateMarkerAlongRoute(preferredOption.coords, preferredOption.color);
 
+  // --- PHASE 5: AI Orb rises + begins speaking ---
+  showAIElement(ai.orbContainer);
+  showAIElement(ai.transcriptBar);
+  await wait(600);
+
+  // Determine greeting
+  const hour = new Date().getHours();
+  let greeting = 'Good evening';
+  if (hour < 12) greeting = 'Good morning';
+  else if (hour < 17) greeting = 'Good afternoon';
+
+  const startName = originCoords.name.split(',')[0].trim();
+  const endName = destCoords.name.split(',')[0].trim();
+
+  // Build script lines — each line is: { text, highlightCard (optional CSS selector) }
+  const script = [
+    { text: `${greeting}. I've analyzed your commute from ${startName} to ${endName}.`, highlight: null },
+    { text: `The ${preferredOption.name.toLowerCase()} is your best option today.`, highlight: null },
+    { text: `You'll arrive in ${preferredOption.duration} minutes.`, highlight: '.perspective-card.time-border' },
+  ];
+
+  if (preferredOption.id !== 'rideshare' && savings > 0) {
+    script.push({
+      text: `You'll save ${currency}${savings} compared to ride-sharing.`,
+      highlight: '.perspective-card.cost-border'
+    });
+  } else {
+    script.push({
+      text: `The fare is ${currency}${preferredOption.cost}.`,
+      highlight: '.perspective-card.cost-border'
+    });
+  }
+
+  if (preferredOption.carbonOffset > 0) {
+    script.push({
+      text: `This route reduces your carbon emissions by ${preferredOption.carbonOffset} percent.`,
+      highlight: '.perspective-card.env-border'
+    });
+  }
+
+  if (preferredOption.id === 'transit') {
+    script.push({ text: `Proceed to the nearest metro station gate. Have a safe commute.`, highlight: '.perspective-card.safety-border' });
+  } else if (preferredOption.id === 'ebike') {
+    script.push({ text: `Your E-bike is available at the nearest docking station. Ride safe.`, highlight: '.perspective-card.safety-border' });
+  } else {
+    script.push({ text: `Your cab has been requested. Please wait at the pickup zone.`, highlight: '.perspective-card.safety-border' });
+  }
+
+  // Populate perspective text data (reused from original)
+  populatePerspectiveTexts(preferredOption, travelOptions, originCoords, destCoords, isIndia, currency);
+  populateRecommendedDecisionCard(preferredOption, travelOptions, isIndia, currency);
+
+  // --- PHASE 6: Speak each line sequentially ---
+  ai.orb.classList.add('speaking');
+
+  for (const line of script) {
+    // Show transcript text with typewriter
+    ai.transcriptText.textContent = '';
+    ai.transcriptText.textContent = line.text;
+
+    // Highlight perspective card if applicable
+    document.querySelectorAll('.perspective-card').forEach(c => c.classList.remove('ai-highlight'));
+    if (line.highlight) {
+      const card = document.querySelector(line.highlight);
+      if (card) card.classList.add('ai-highlight');
+    }
+
+    // Speak
+    await speakLine(line.text);
+    await wait(500);
+  }
+
+  ai.orb.classList.remove('speaking');
+
+  // --- PHASE 7: Wrap up — reveal sidebar results, fade out orb ---
+  await wait(600);
+
+  // Clear highlights
+  document.querySelectorAll('.perspective-card').forEach(c => c.classList.remove('ai-highlight'));
+
+  // Reveal analysis results in sidebar
+  results.style.display = 'flex';
+  lucide.createIcons();
+
+  // Mark active perspective cards
+  const timeCard = document.querySelector('.perspective-card.time-border');
+  const costCard = document.querySelector('.perspective-card.cost-border');
+  const safetyCard = document.querySelector('.perspective-card.safety-border');
+  const envCard = document.querySelector('.perspective-card.env-border');
+
+  if (preferredOption.id === fastestOpt.id && timeCard) timeCard.classList.add('active');
+  if (preferredOption.id === cheapestOpt.id && costCard) costCard.classList.add('active');
+  if (preferredOption.id === safestOpt.id && safetyCard) safetyCard.classList.add('active');
+  if (preferredOption.id === greenestOpt.id && envCard) envCard.classList.add('active');
+
+  // Bind click handlers on perspective cards
+  if (timeCard) timeCard.addEventListener('click', () => highlightSelectedRoute(fastestOpt));
+  if (costCard) costCard.addEventListener('click', () => highlightSelectedRoute(cheapestOpt));
+  if (safetyCard) safetyCard.addEventListener('click', () => highlightSelectedRoute(safestOpt));
+  if (envCard) envCard.addEventListener('click', () => highlightSelectedRoute(greenestOpt));
+
+  // Fade out AI overlay elements
+  await wait(1200);
+  hideAIElement(ai.transcriptBar);
+  hideAIElement(ai.orbContainer);
+  await wait(800);
+  hideAIElement(ai.overlay);
+
+  // Re-enable submit button
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '<i data-lucide="sparkles"></i> Analyze Route';
+  lucide.createIcons();
+
+  // Route highlight handler (shared across perspective card clicks)
   function highlightSelectedRoute(selectedOpt) {
     animateMarkerAlongRoute(selectedOpt.coords, selectedOpt.color);
 
@@ -486,12 +732,8 @@ async function handleFormSubmit(e) {
       });
     });
 
-    populatePerspectiveTexts(selectedOpt);
+    populatePerspectiveTexts(selectedOpt, travelOptions, originCoords, destCoords, isIndia, currency);
 
-    const timeCard = document.querySelector('.perspective-card.time-border');
-    const costCard = document.querySelector('.perspective-card.cost-border');
-    const safetyCard = document.querySelector('.perspective-card.safety-border');
-    const envCard = document.querySelector('.perspective-card.env-border');
     const cards = [timeCard, costCard, safetyCard, envCard];
     cards.forEach(c => { if (c) c.classList.remove('active'); });
 
@@ -500,96 +742,70 @@ async function handleFormSubmit(e) {
     if (selectedOpt.id === safestOpt.id && safetyCard) safetyCard.classList.add('active');
     if (selectedOpt.id === greenestOpt.id && envCard) envCard.classList.add('active');
   }
+}
 
-  function populatePerspectiveTexts(opt) {
-    const startName = originCoords.name.split(',')[0];
-    const endName = destCoords.name.split(',')[0];
+// Extracted helper: Populate perspective card text
+function populatePerspectiveTexts(opt, travelOptions, originCoords, destCoords, isIndia, currency) {
+  const endName = destCoords.name.split(',')[0];
+  const rideShareCost = travelOptions.rideshare.cost;
+  const savings = Math.max(0, rideShareCost - opt.cost);
 
-    if (opt.id === 'transit') {
-      document.getElementById('time-reasoning').textContent = 
-        `Metro grids secure transport to ${endName} in exactly ${opt.duration} minutes, bypassing road delays entirely.`;
-    } else if (opt.id === 'ebike') {
-      document.getElementById('time-reasoning').textContent = 
-        `E-bike pathing routes you along designated lanes, arriving in ${opt.duration} minutes at a steady, active pace.`;
-    } else {
-      document.getElementById('time-reasoning').textContent = 
-        `Private rideshare requires ${opt.duration} minutes due to current traffic density levels at the highway junctions.`;
-    }
-
-    const rideShareCost = travelOptions.rideshare.cost;
-    const savings = Math.max(0, rideShareCost - opt.cost);
-
-    if (opt.id === 'rideshare') {
-      document.getElementById('cost-reasoning').textContent = 
-        `Rideshare fares total ${currency}${opt.cost}, including premium road toll tariffs and fuel charges.`;
-    } else {
-      document.getElementById('cost-reasoning').textContent = 
-        `Choosing ${opt.name} costs only ${currency}${opt.cost}, saving you ${currency}${savings} compared to highway rideshare booking.`;
-    }
-
-    if (opt.id === 'transit') {
-      document.getElementById('safety-reasoning').textContent = 
-        `Dedicated tracks and pedestrian skywalk links yield a grade-separated journey with the highest safety score.`;
-    } else if (opt.id === 'ebike') {
-      document.getElementById('safety-reasoning').textContent = 
-        `Local bicycle lanes offer separated road markings, reducing standard vehicular merging risks.`;
-    } else {
-      document.getElementById('safety-reasoning').textContent = 
-        `Highway driving shares the flow with heavy commercial vehicles, matching average safety metrics.`;
-    }
-
-    if (opt.id === 'rideshare') {
-      document.getElementById('env-reasoning').textContent = 
-        `Single-occupancy combustion vehicles result in standard road emissions, yielding no carbon offsets.`;
-    } else {
-      document.getElementById('env-reasoning').textContent = 
-        `Electric-powered ${opt.name} reduces tailpipe output, securing a ${opt.carbonOffset}% lower carbon footprint.`;
-    }
+  if (opt.id === 'transit') {
+    document.getElementById('time-reasoning').textContent =
+      `Metro grids secure transport to ${endName} in exactly ${opt.duration} minutes, bypassing road delays entirely.`;
+  } else if (opt.id === 'ebike') {
+    document.getElementById('time-reasoning').textContent =
+      `E-bike pathing routes you along designated lanes, arriving in ${opt.duration} minutes at a steady, active pace.`;
+  } else {
+    document.getElementById('time-reasoning').textContent =
+      `Private rideshare requires ${opt.duration} minutes due to current traffic density levels at the highway junctions.`;
   }
 
-  function populateRecommendedDecisionCard(opt) {
-    const rideShareCost = travelOptions.rideshare.cost;
-    const savings = Math.max(0, rideShareCost - opt.cost);
-    
-    document.getElementById('rec-mode').textContent = `Take ${opt.name}.`;
-    document.getElementById('metric-time').textContent = `${opt.duration} mins.`;
-    
-    if (opt.id === 'rideshare') {
-      document.getElementById('metric-cost').textContent = `${currency}${opt.cost} fare.`;
-      document.getElementById('metric-carbon').textContent = "Standard emissions.";
-      document.getElementById('metric-safety').textContent = "Standard safety score.";
-    } else {
-      document.getElementById('metric-cost').textContent = `${currency}${savings} cheaper.`;
-      document.getElementById('metric-carbon').textContent = `${opt.carbonOffset}% lower emissions.`;
-      document.getElementById('metric-safety').textContent = opt.id === 'transit' ? "Highest safety score." : "High safety score.";
-    }
+  if (opt.id === 'rideshare') {
+    document.getElementById('cost-reasoning').textContent =
+      `Rideshare fares total ${currency}${opt.cost}, including premium road toll tariffs and fuel charges.`;
+  } else {
+    document.getElementById('cost-reasoning').textContent =
+      `Choosing ${opt.name} costs only ${currency}${opt.cost}, saving you ${currency}${savings} compared to highway rideshare booking.`;
   }
 
-  const timeCard = document.querySelector('.perspective-card.time-border');
-  const costCard = document.querySelector('.perspective-card.cost-border');
-  const safetyCard = document.querySelector('.perspective-card.safety-border');
-  const envCard = document.querySelector('.perspective-card.env-border');
+  if (opt.id === 'transit') {
+    document.getElementById('safety-reasoning').textContent =
+      `Dedicated tracks and pedestrian skywalk links yield a grade-separated journey with the highest safety score.`;
+  } else if (opt.id === 'ebike') {
+    document.getElementById('safety-reasoning').textContent =
+      `Local bicycle lanes offer separated road markings, reducing standard vehicular merging risks.`;
+  } else {
+    document.getElementById('safety-reasoning').textContent =
+      `Highway driving shares the flow with heavy commercial vehicles, matching average safety metrics.`;
+  }
 
-  if (timeCard) timeCard.addEventListener('click', () => highlightSelectedRoute(fastestOpt));
-  if (costCard) costCard.addEventListener('click', () => highlightSelectedRoute(cheapestOpt));
-  if (safetyCard) safetyCard.addEventListener('click', () => highlightSelectedRoute(safestOpt));
-  if (envCard) envCard.addEventListener('click', () => highlightSelectedRoute(greenestOpt));
+  if (opt.id === 'rideshare') {
+    document.getElementById('env-reasoning').textContent =
+      `Single-occupancy combustion vehicles result in standard road emissions, yielding no carbon offsets.`;
+  } else {
+    document.getElementById('env-reasoning').textContent =
+      `Electric-powered ${opt.name} reduces tailpipe output, securing a ${opt.carbonOffset}% lower carbon footprint.`;
+  }
+}
 
-  populatePerspectiveTexts(preferredOption);
-  populateRecommendedDecisionCard(preferredOption);
+// Extracted helper: Populate recommended decision card
+function populateRecommendedDecisionCard(opt, travelOptions, isIndia, currency) {
+  const rideShareCost = travelOptions.rideshare.cost;
+  const savings = Math.max(0, rideShareCost - opt.cost);
 
-  if (preferredOption.id === fastestOpt.id && timeCard) timeCard.classList.add('active');
-  if (preferredOption.id === cheapestOpt.id && costCard) costCard.classList.add('active');
-  if (preferredOption.id === safestOpt.id && safetyCard) safetyCard.classList.add('active');
-  if (preferredOption.id === greenestOpt.id && envCard) envCard.classList.add('active');
+  document.getElementById('rec-mode').textContent = `Take ${opt.name}.`;
+  document.getElementById('metric-time').textContent = `${opt.duration} mins.`;
 
-  setTimeout(() => {
-    loader.style.display = 'none';
-    results.style.display = 'flex';
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i data-lucide="sparkles"></i> Analyze Route';
-    lucide.createIcons();
-  }, 1200);
+  if (opt.id === 'rideshare') {
+    document.getElementById('metric-cost').textContent = `${currency}${opt.cost} fare.`;
+    document.getElementById('metric-carbon').textContent = "Standard emissions.";
+    document.getElementById('metric-safety').textContent = "Standard safety score.";
+  } else {
+    document.getElementById('metric-cost').textContent = `${currency}${savings} cheaper.`;
+    document.getElementById('metric-carbon').textContent = `${opt.carbonOffset}% lower emissions.`;
+    document.getElementById('metric-safety').textContent = opt.id === 'transit' ? "Highest safety score." : "High safety score.";
+  }
 }
 
 // Initialize dynamic local departure time dropdown options

@@ -9,9 +9,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   
   <!-- Custom Design Styles -->
-  <script type="module" crossorigin src="/assets/planner-Dowtbh1I.js"></script>
+  <script type="module" crossorigin src="/assets/planner-DWFCid1e.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-TuDwPi1l.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-D6blGQeL.css">
 </head>
 <body data-theme="light">
 
@@ -171,6 +171,34 @@
       </div>
 
     </aside>
+
+    <!-- AI MOBILITY ADVISOR OVERLAY (Cinematic Experience) -->
+
+    <!-- Cinematic dim overlay during AI analysis -->
+    <div class="ai-cinematic-overlay" id="ai-cinematic-overlay"></div>
+
+    <!-- AI Voice Orb (Siri-like pulsing sphere, bottom center of map area) -->
+    <div class="ai-orb-container" id="ai-orb-container">
+      <div class="ai-orb" id="ai-orb">
+        <div class="ai-orb-ring ai-orb-ring-1"></div>
+        <div class="ai-orb-ring ai-orb-ring-2"></div>
+        <div class="ai-orb-ring ai-orb-ring-3"></div>
+        <div class="ai-orb-core"></div>
+      </div>
+      <div class="ai-orb-label" id="ai-orb-label">NOMAD Advisor</div>
+    </div>
+
+    <!-- AI Transcript Bar (floating text overlay on map) -->
+    <div class="ai-transcript-bar" id="ai-transcript-bar">
+      <div class="ai-transcript-text" id="ai-transcript-text"></div>
+    </div>
+
+    <!-- AI Analyzing Phase Indicator -->
+    <div class="ai-analyzing-hud" id="ai-analyzing-hud">
+      <div class="ai-analyzing-spinner"></div>
+      <span>Analyzing your commute...</span>
+    </div>
+
   </main>
 
   <!-- Lucide Vector Icons Library -->

@@ -2948,3 +2948,235 @@ body.demo-mode .btn-exit-demo {
   color: #eee;
   cursor: not-allowed;
 }
+
+/* ==========================================
+   AI MOBILITY ADVISOR — CINEMATIC EXPERIENCE
+   Siri / Apple Intelligence / Tesla style
+   ========================================== */
+
+/* --- Cinematic dim overlay --- */
+.ai-cinematic-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: radial-gradient(ellipse at 50% 80%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%);
+  z-index: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ai-cinematic-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- AI Voice Orb Container (bottom center of map panel) --- */
+.ai-orb-container {
+  position: fixed;
+  bottom: 48px;
+  left: calc(35%); /* center of the 70% map area */
+  transform: translateX(-50%) scale(0.5);
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ai-orb-container.active {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
+}
+
+/* --- The Orb itself --- */
+.ai-orb {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Core glowing sphere */
+.ai-orb-core {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #7c5cfc, #a78bfa, #818cf8);
+  box-shadow:
+    0 0 20px rgba(124, 92, 252, 0.5),
+    0 0 60px rgba(124, 92, 252, 0.25),
+    inset 0 -4px 12px rgba(0,0,0,0.15);
+  z-index: 4;
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+/* Concentric pulsing rings */
+.ai-orb-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(124, 92, 252, 0.25);
+  opacity: 0;
+}
+
+.ai-orb-ring-1 {
+  width: 48px; height: 48px;
+  animation: ai-orb-pulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.ai-orb-ring-2 {
+  width: 60px; height: 60px;
+  animation: ai-orb-pulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.4s infinite;
+}
+.ai-orb-ring-3 {
+  width: 72px; height: 72px;
+  animation: ai-orb-pulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.8s infinite;
+}
+
+@keyframes ai-orb-pulse {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+}
+
+/* Speaking state — orb beats */
+.ai-orb.speaking .ai-orb-core {
+  animation: ai-orb-speak-beat 0.6s ease-in-out infinite alternate;
+}
+.ai-orb.speaking .ai-orb-ring-1 { animation-duration: 1.4s; }
+.ai-orb.speaking .ai-orb-ring-2 { animation-duration: 1.4s; animation-delay: 0.2s; }
+.ai-orb.speaking .ai-orb-ring-3 { animation-duration: 1.4s; animation-delay: 0.4s; }
+
+@keyframes ai-orb-speak-beat {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.12); }
+}
+
+/* Orb label */
+.ai-orb-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+  transition: opacity 0.5s ease;
+}
+
+/* --- AI Transcript Bar (floating centered text) --- */
+.ai-transcript-bar {
+  position: fixed;
+  bottom: 148px;
+  left: calc(35%);
+  transform: translateX(-50%);
+  z-index: 900;
+  max-width: 520px;
+  width: 80%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ai-transcript-bar.active {
+  opacity: 1;
+}
+
+.ai-transcript-text {
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  line-height: 1.6;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+  letter-spacing: -0.01em;
+  min-height: 1.6em;
+}
+
+/* --- AI Analyzing HUD (spinner + text on map) --- */
+.ai-analyzing-hud {
+  position: fixed;
+  top: 50%;
+  left: calc(35%);
+  transform: translate(-50%, -50%);
+  z-index: 850;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ai-analyzing-hud.active {
+  opacity: 1;
+}
+.ai-analyzing-hud span {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+}
+
+.ai-analyzing-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top: 3px solid rgba(124, 92, 252, 0.9);
+  border-radius: 50%;
+  animation: ai-spinner-rotate 1s linear infinite;
+}
+
+@keyframes ai-spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Animated route line drawing (Leaflet polyline overrides) --- */
+.leaflet-ai-animated-route {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: ai-route-draw 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes ai-route-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Dark theme adjustments for AI orb */
+[data-theme="dark"] .ai-orb-core {
+  background: linear-gradient(145deg, #6d5ce7, #a78bfa, #c4b5fd);
+  box-shadow:
+    0 0 24px rgba(167, 139, 250, 0.6),
+    0 0 80px rgba(167, 139, 250, 0.3),
+    inset 0 -4px 12px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .ai-orb-ring {
+  border-color: rgba(167, 139, 250, 0.3);
+}
+[data-theme="dark"] .ai-cinematic-overlay {
+  background: radial-gradient(ellipse at 50% 80%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Perspective cards highlight animation during AI speech */
+.perspective-card.ai-highlight {
+  border-color: rgba(124, 92, 252, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.15), var(--shadow-lg) !important;
+  transform: translateY(-2px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
